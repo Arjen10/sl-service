@@ -1,0 +1,25 @@
+# CMake / Build directories
+/cmake-build-*/
+/build/
+/out/
+/dist/
+
+# IDE
+.idea/
+# macOS 拉的屎
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Compiled binaries
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+*.dll
+
+# Editors
+.vscode/
+*.swp
+*~

@@ -1,0 +1,41 @@
+server:
+  # 监听 ip，默认 127.0.0.1
+  listen-ip: 127.0.0.1
+  # 监听端口，默认 4399
+  port: 4399
+  session:
+    # 最大缓冲区大小，默认 2048
+    max-buffer: 2048
+    # 读取超时时间，单位秒，默认 900
+    reader-idle-time-out: 900
+  thread:
+    # asio线程数量，默认 2
+    asio-ioc: 2
+    # 业务线程池数量，默认 2
+    pool: 2
+
+callback:
+  # 是否启用回调，默认不启用
+  enable: false
+  # 回调方式：http、redis、mqtt
+  method: http
+  http:
+    # post http url，json 数据通过请求体传输
+    url: http://127.0.0.1:6620/awqmd/test
+    # 连接超时，单位秒
+    connect-time-out: 3
+    auth-header:
+    auth-token:
+  mqtt:
+    broker-host: 127.0.0.1
+    broker-port: 1350
+    client-id: sl-service-1.0
+    # 最终 topic = topic-prefix + "/" + stcd
+    # 例如 topic = sl-service-1.0/60001111
+    topic-prefix: sl-service-1.0
+    # 推荐 1
+    qos: 1
+
+log:
+  # DEBUG INFO WARN ERROR FATAL
+  level: DEBUG
