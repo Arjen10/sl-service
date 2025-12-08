@@ -9,8 +9,25 @@ sl-service 是一个轻量级、高可用的后端服务，专为水利行业设
 ## 核心功能
 
 1、内置水利行业常用报文格式解析器（如SL651-2014）。
+
 2、插件式协议解析器，便于新增报文格式支持。
 
 ## 技术栈
 
 C++17、boost asio
+
+## 快速开始
+
+### 先决条件
+
+（推荐）安装 vcpkg 或手动安装 vcpkg.json 中的相关第三方库
+
+### 编译
+
+```text
+git clone https://github.com/Arjen10/sl-service.git
+mkdir build
+cd build
+cmake ..
+cmake --build .
+```
