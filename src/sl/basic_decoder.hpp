@@ -5,9 +5,6 @@
 #ifndef BASIC_DECODER_HPP
 #define BASIC_DECODER_HPP
 
-#define CONTENT_TYPE "Content-Type"
-#define APP_JSON "application/json"
-
 #include <boost/beast.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/asio/streambuf.hpp>
@@ -22,10 +19,30 @@
 #include "sl_parser_base.hpp"
 #include "protocol_define.hpp"
 #include "byte_buf_reader.hpp"
+#include "../core/callback_method.hpp"
 
-namespace beast = boost::beast;                 // from <boost/beast.hpp>
+namespace beast = boost::beast;
 
 using crc_value_t = std::variant<int16_t, int8_t>;
+
+namespace callback {
+
+    namespace chrono = std::chrono;
+
+    /**
+     * 回调函数
+     */
+    using func = std::function<void(const std::string &stcd,
+                                    const nlohmann::json &h_j,
+                                    const nlohmann::json &c_j,
+                                    const nlohmann::json &e_j)>;
+
+    /**
+     * 存放标识符的解析函数，不要抛出异常打印日志即可
+     */
+    extern const std::unordered_map<method, func> _map;
+
+}
 
 /**
  * 封装报文数据对应的注释和实际取值
@@ -117,46 +134,55 @@ public:
                                       const boost::asio::const_buffer &end) = 0;
 };
 
-template<typename base, typename h, typename c, typename e>
+template<typename base, typename header, typename content, typename end>
 class sl_decoder_crtp : public sl_basic_decoder {
 
+    /**
+     * 解析模版，将解析报文头、报文正文、报文结束部分拆分
+     * @param sl_full_buf 水利完整 buffer
+     * @return
+     */
     std::optional<std::shared_ptr<asio::streambuf>> parse_template(const sl_full_buf &sl_full_buf) override {
         base *base_ptr = static_cast<base *>(this);
-        const std::shared_ptr<h> h_ptr = base_ptr->parse_header(sl_full_buf.header());
-        const std::shared_ptr<c> c_ptr = base_ptr->parse_content(h_ptr, sl_full_buf.content());
-        const std::shared_ptr<e> e_ptr = base_ptr->parse_end(h_ptr, c_ptr, sl_full_buf.end());
+        const std::shared_ptr<header> h_ptr = base_ptr->parse_header(sl_full_buf.header());
+        const std::shared_ptr<content> c_ptr = base_ptr->parse_content(h_ptr, sl_full_buf.content());
+        const std::shared_ptr<end> e_ptr = base_ptr->parse_end(h_ptr, c_ptr, sl_full_buf.end());
         base_ptr->do_something(h_ptr, c_ptr, e_ptr);
         return base_ptr->resp_byte_buffer(h_ptr, c_ptr, e_ptr);
     }
 
+protected:
+
+    /**
+     * 回调业务端，具体回调方式由配置文件决定
+     * @param stcd 测站编码
+     * @param h 报头
+     * @param c 报体
+     * @param e 报尾
+     */
+    void call_back(const std::string &stcd,
+                   const std::shared_ptr<header> &h,
+                   const std::shared_ptr<content> &c,
+                   const std::shared_ptr<end> &e) {
+        auto &back_cfg = conf::sl::instance().get_callback();
+        // 回调未开启，直接跳过
+        if (!back_cfg.enable()) {
+            return;
+        }
+        auto &m_opt = back_cfg.get_callback_method();
+        auto it = callback::_map.find(m_opt.value());
+        if (it == callback::_map.end()) {
+            LOG_ERROR << "未找到对应的回调函数，请检查配置文件 callback.method 项目";
+            return;
+        }
+        nlohmann::json h_json = h;
+        nlohmann::json c_json = c;
+        nlohmann::json e_json = e;
+        // 开始回调
+        it->second(stcd, h_json, c_json, e_json);
+    }
+
 };
-
-namespace callback {
-
-    namespace chrono = std::chrono;
-
-    enum method : uint16_t {
-
-        /**
-         * http回调
-         */
-        http = 1,
-
-    };
-
-    /**
-     * 回调函数
-     */
-    using func = std::function<void(const nlohmann::json &h_j,
-                                    const nlohmann::json &c_j,
-                                    const nlohmann::json &e_j)>;
-
-    /**
-     * 存放标识符的解析函数
-     */
-    extern const std::unordered_map<method, func> _map;
-
-}
 
 
 #endif //BASIC_DECODER_HPP

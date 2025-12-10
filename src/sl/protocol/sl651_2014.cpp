@@ -361,10 +361,7 @@ namespace sl651_2014::codec {
     void decoder::do_something(const model::h_shared_ptr &h_ptr,
                                const model::c_shared_ptr &c_ptr,
                                const model::e_shared_ptr &e_ptr) {
-        nlohmann::json h_json = h_ptr;
-        nlohmann::json c_json = c_ptr;
-        nlohmann::json e_json = e_ptr;
-        callback::_map.at(callback::http)(h_json, c_json, e_json);
+        this->call_back(h_ptr->_rtu_stcd, h_ptr, c_ptr, e_ptr);
     }
 
     std::optional<std::shared_ptr<asio::streambuf>> decoder::resp_byte_buffer(const model::h_shared_ptr &h_ptr,

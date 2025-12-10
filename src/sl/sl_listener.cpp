@@ -2,7 +2,9 @@
 // Created by Arjen on 2024/12/21.
 //
 
-#include "sl_basic.hpp"
+#include "sl_listener.hpp"
+
+#include "../core/log.hpp"
 
 sl_listener::sl_listener(net::io_context &ioc, const tcp::endpoint& endpoint)
         : ioc_(ioc), acceptor_(net::make_strand(ioc)) {

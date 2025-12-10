@@ -5,14 +5,22 @@
 #ifndef SL_SERVICE_CALLBACK_METHOD_HPP
 #define SL_SERVICE_CALLBACK_METHOD_HPP
 
-#include <stdint.h>
-
 enum method : uint16_t {
 
     /**
      * http回调
      */
-    http = 1,
+    http_callback = 1,
+
+    /**
+     * MQTT
+     */
+    mqtt_callback = 2,
+
+    /**
+     * 未知
+     */
+    unknown = 999,
 
 };
 

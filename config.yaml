@@ -15,10 +15,10 @@ server:
     pool: 2
 
 callback:
-  # 是否启用回调，默认不启用
-  enable: false
-  # 回调方式：http、redis、mqtt
-  method: http
+  # 是否启用回调，默认不启用，true 或者 false
+  enable: true
+  # 回调方式：http、mqtt
+  method: mqtt
   http:
     # post http url，json 数据通过请求体传输
     url: http://127.0.0.1:6620/awqmd/test
@@ -27,12 +27,17 @@ callback:
     auth-header:
     auth-token:
   mqtt:
-    broker-host: 127.0.0.1
-    broker-port: 1350
-    client-id: sl-service-1.0
+    # 测试 broker 地址
+    broker-host: broker.emqx.io
+    broker-port: 1883
+    client-id: sl-service
+    # 用户名
+    username:
+    # 密码
+    password:
     # 最终 topic = topic-prefix + "/" + stcd
-    # 例如 topic = sl-service-1.0/60001111
-    topic-prefix: sl-service-1.0
+    # 例如 topic = sl-service/60001111
+    topic-prefix: sl-service
     # 推荐 1
     qos: 1
 

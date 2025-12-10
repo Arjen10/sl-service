@@ -17,7 +17,6 @@
 #include <thread>
 #include <string>
 
-#include "../core/log.hpp"
 #include "sl_session_map.hpp"
 
 namespace net = boost::asio;                    // from <boost/asio.hpp>
@@ -30,7 +29,6 @@ class sl_listener: public std::enable_shared_from_this<sl_listener>
 public:
 
     sl_listener(net::io_context &ioc, const tcp::endpoint& endpoint);
-    // Start accepting incoming connections
     void run();
 private:
     void do_accept();
