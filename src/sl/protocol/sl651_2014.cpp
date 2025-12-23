@@ -472,10 +472,14 @@ namespace sl651_2014::parse {
         uint32_t data_length = data_info >> 3;
         // 小数点取低三位，小数点位置
         uint32_t decimal_point = data_info & 0x07;
-        // todo 0xAAAAAAAAL 无效值的判断
-        int ret = reader.read_bcd_byte_to_int(data_length);
-        // 除以 10^decimal_point，小数点左移
-        v = ret / std::pow(10.0, decimal_point);
+        std::int64_t ret = reader.read_bcd_byte_to_int64(data_length);
+        // 0xAAAAAAAA 无效值
+        if (ret == 0xAAAAAAAAULL) {
+            v = std::numeric_limits<double>::quiet_NaN();
+        } else {
+            // 除以 10^decimal_point，小数点左移
+            v = static_cast<double>(ret) / std::pow(10.0, decimal_point);
+        }
         return data_length + 1;
     }
 

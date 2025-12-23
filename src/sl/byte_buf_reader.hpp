@@ -135,7 +135,7 @@ public:
     /**
      * 将bcd字节读取为int
      */
-    int read_bcd_byte_to_int(std::size_t length);
+    std::int64_t read_bcd_byte_to_int64(std::size_t length);
 
     /**
      * 读取时间

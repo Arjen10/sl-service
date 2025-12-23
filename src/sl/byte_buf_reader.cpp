@@ -90,8 +90,8 @@ void byte_buf_reader::skip(std::size_t length) {
     read_index_ += length;
 }
 
-int byte_buf_reader::read_bcd_byte_to_int(std::size_t length) {
-    int ret = 0;
+std::int64_t byte_buf_reader::read_bcd_byte_to_int64(std::size_t length) {
+    std::int64_t ret = 0;
     for (std::size_t i = 0; i < length; ++i) {
         auto b = static_cast<unsigned char>(p_[read_index_]);
         // 每个字节贡献两位
@@ -103,12 +103,12 @@ int byte_buf_reader::read_bcd_byte_to_int(std::size_t length) {
 
 void byte_buf_reader::read_tm(boost::posix_time::ptime &tm, std::size_t time_length) {
     // 2000 + year
-    int year = 2000 + read_bcd_byte_to_int(1);
-    int month = read_bcd_byte_to_int(1);
-    int day = read_bcd_byte_to_int(1);
-    int hour = read_bcd_byte_to_int(1);
-    int min = read_bcd_byte_to_int(1);
-    int sec = (time_length == 6) ? read_bcd_byte_to_int(1) : 0;
+    int year = 2000 + read_bcd_byte_to_int64(1);
+    int month = read_bcd_byte_to_int64(1);
+    int day = read_bcd_byte_to_int64(1);
+    int hour = read_bcd_byte_to_int64(1);
+    int min = read_bcd_byte_to_int64(1);
+    int sec = (time_length == 6) ? read_bcd_byte_to_int64(1) : 0;
     tm = boost::posix_time::ptime(boost::gregorian::date(year, month, day),
                                   boost::posix_time::hours(hour) +
                                   boost::posix_time::minutes(min) +
