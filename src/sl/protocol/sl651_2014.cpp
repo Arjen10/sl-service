@@ -465,17 +465,18 @@ namespace sl651_2014::parse {
      * 解析 bcd 编码的数据
      */
     uint32_t parse_data(byte_buf_reader &reader, std::optional<double> &v) {
-        int8_t tmp_byte;
-        reader.read_byte(tmp_byte);
+        int8_t data_info;
+        // 读取一个字节，包含后续数据长度和小数点位数
+        reader.read_byte(data_info);
         // 取高五位 data_length 为数据的长度
-        uint32_t data_length = tmp_byte >> 3;
+        uint32_t data_length = data_info >> 3;
         // 小数点取低三位，小数点位置
-        uint32_t decimal_point = tmp_byte & 0x07;
+        uint32_t decimal_point = data_info & 0x07;
         // todo 0xAAAAAAAAL 无效值的判断
         int ret = reader.read_bcd_byte_to_int(data_length);
         // 除以 10^decimal_point，小数点左移
         v = ret / std::pow(10.0, decimal_point);
-        return data_length;
+        return data_length + 1;
     }
 
     // 初始化 unordered_map
