@@ -13,10 +13,14 @@ server:
     asio-ioc: 2
     # 业务线程池数量，默认 2
     pool: 2
+  log:
+    # debug info warning error fatal
+    # 如果在上方日志等级中没有出现，默认 info
+    level: info
 
 callback:
   # 是否启用回调，默认不启用，true 或者 false
-  enable: true
+  enable: false
   # 回调方式：http、mqtt
   method: mqtt
   http:
@@ -28,7 +32,7 @@ callback:
     auth-token:
   mqtt:
     # 测试 broker 地址
-    broker-host: broker.emqx.io
+    broker-host: broker-cn.emqx.io
     broker-port: 1883
     client-id: sl-service
     # 用户名
@@ -41,6 +45,3 @@ callback:
     # 推荐 1
     qos: 1
 
-log:
-  # DEBUG INFO WARN ERROR FATAL
-  level: DEBUG
