@@ -67,20 +67,20 @@ namespace callback {
 }
 
 raw_hex_value::raw_hex_value(byte_buf_reader &reader, uint16_t length,
-                             std::string note, std::string v)
-        : _note(std::move(note)), _length(length), _v(std::move(v)) {
+                             std::string note, std::string v, bool extended)
+        : _note(std::move(note)), _length(length), _v(std::move(v)), _extended(extended) {
     reader.read_hex_str(this->_raw_hex, length);
 }
 
 raw_hex_value::raw_hex_value(byte_buf_reader &reader, uint16_t length,
-                             std::string note, const nlohmann::json &v)
-        : _note(std::move(note)), _length(length), _v(v.get<std::string>()) {
+                             std::string note, const nlohmann::json &v, bool extended)
+        : _note(std::move(note)), _length(length), _v(v.get<std::string>()), _extended(extended) {
     reader.read_hex_str(this->_raw_hex, length);
 }
 
 raw_hex_value::raw_hex_value(byte_buf_reader &reader, uint16_t length,
-                             std::string note)
-        : _note(std::move(note)), _length(length) {
+                             std::string note, bool extended)
+        : _note(std::move(note)), _length(length), _extended(extended) {
     reader.read_hex_str(this->_raw_hex, length);
     _v = this->_raw_hex;
 }
@@ -98,4 +98,5 @@ void to_json(nlohmann::json &j, const raw_hex_value &value) {
     JSON_FIELD_REF(j, value, _length);
     JSON_FIELD_REF(j, value, _note);
     JSON_FIELD_REF(j, value, _v);
+    JSON_FIELD_REF(j, value, _extended);
 }

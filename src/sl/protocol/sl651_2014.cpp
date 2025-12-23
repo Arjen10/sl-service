@@ -168,7 +168,7 @@ namespace sl651_2014::model {
     std::unordered_map<std::string, std::optional<double>> &content::expand_map() {
         switch (this->_station_type) {
             case wq:
-                return this->_awqmd->_expand;
+                return this->_awqmd->_extended;
             case rr:
             case pp:
             case zq_zz:
@@ -320,9 +320,9 @@ namespace sl651_2014::codec {
                 // 这里存入 hex 编码
                 expand_map.emplace(oss.str(), temp_opt);
                 std::string expand_note = "拓展标识符 " + oss.str();
-                c_ptr->_raw_list.emplace_back(hex_reader, 1, expand_note);
+                c_ptr->_raw_list.emplace_back(hex_reader, 1, expand_note, true);
                 auto v_str = temp_opt ? std::to_string(temp_opt.value()) : "null";
-                c_ptr->_raw_list.emplace_back(hex_reader, data_len, expand_note + "  取值", v_str);
+                c_ptr->_raw_list.emplace_back(hex_reader, data_len, expand_note + "  取值", v_str, true);
                 LOG_DEBUG << " 不支持的标识符 " << oss.str() << " 值 " << v_str;
             } catch (std::exception &e) {
                 LOG_ERROR << e.what();

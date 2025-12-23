@@ -71,17 +71,22 @@ public:
      */
     std::string _v;
 
+    /**
+     * 是否为拓展标识符
+     */
+    bool _extended;
+
 public:
     friend void to_json(nlohmann::json &j, const raw_hex_value &value);
 
     explicit raw_hex_value(byte_buf_reader &reader, uint16_t length,
-                           std::string note, std::string v);
+                           std::string note, std::string v, bool extended = false);
 
     explicit raw_hex_value(byte_buf_reader &reader, uint16_t length,
-                           std::string note, const nlohmann::json &v);
+                           std::string note, const nlohmann::json &v, bool extended = false);
 
     explicit raw_hex_value(byte_buf_reader &reader, uint16_t length,
-                           std::string note);
+                           std::string note, bool extended = false);
 
     /**
      * 更新数据

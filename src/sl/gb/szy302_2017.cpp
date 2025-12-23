@@ -61,5 +61,5 @@ void wq::to_json(nlohmann::json &j, const wq_awqmd_d &awqmd) {
     JSON_FIELD_REF(j, awqmd, _test_com_tm);
     JSON_FIELD_REF(j, awqmd, _ts);
     JSON_FIELD_REF(j, awqmd, _spe_reg_data);
-    JSON_FIELD_REF(j, awqmd, _expand);
+    JSON_FIELD_REF(j, awqmd, _extended);
 }

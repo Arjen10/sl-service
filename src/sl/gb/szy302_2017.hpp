@@ -289,7 +289,7 @@ namespace wq {
         std::optional<std::string> _spe_reg_data;
 
         // 非标准表字段，这里只是拓展属性，交给业务端处理
-        std::unordered_map<std::string, std::optional<double>> _expand;
+        std::unordered_map<std::string, std::optional<double>> _extended;
 
     public:
 
