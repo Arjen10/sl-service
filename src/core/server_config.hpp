@@ -5,14 +5,12 @@
 #ifndef SL_SERVICE_SERVER_CONFIG_HPP
 #define SL_SERVICE_SERVER_CONFIG_HPP
 
-#include <boost/program_options.hpp>
 #include <boost/mqtt5/types.hpp>
+#include <boost/log/trivial.hpp>
 #include <yaml-cpp/yaml.h>
 
 #include "log.hpp"
 #include "callback_method.hpp"
-
-namespace po = boost::program_options;
 
 class sl;
 
@@ -96,13 +94,22 @@ public:
 class thread {
     friend server;
 private:
-    std::size_t _asio_ioc;
-    std::size_t _pool;
+    std::uint16_t _asio_ioc;
+    std::uint16_t _pool;
     void init(const YAML::Node &node);
 
 public:
-    size_t asio_ioc() const;
-    size_t pool() const;
+    std::uint16_t asio_ioc() const;
+    std::uint16_t pool() const;
+};
+
+class boost_log {
+    friend server;
+private:
+    boost::log::trivial::severity_level _level;
+    void init(const YAML::Node &node);
+public:
+    boost::log::trivial::severity_level level();
 };
 
 class server {
@@ -112,6 +119,7 @@ private:
     uint16_t _port;
     session _session;
     thread _thread;
+    boost_log _boost_log;
 
 public:
     void init(const YAML::Node &node);
@@ -123,6 +131,9 @@ public:
     const session &get_session() const;
 
     const thread &get_thread() const;
+
+    const boost_log &get_log() const;
+
 };
 
 

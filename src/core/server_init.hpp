@@ -39,7 +39,7 @@ namespace conf {
         sl() = default;
         friend class singleton_template<sl>;
     public:
-        void init(int argc, char *argv[]);
+        void init(const po::variables_map &vm);
         const server &get_server() const;
         const call_back &get_callback() const;
     };
@@ -48,11 +48,13 @@ namespace conf {
 
 namespace logger {
 
+    namespace po = boost::program_options;
+
     namespace logging = boost::log;
     namespace expr = boost::log::expressions;
     namespace keywords = boost::log::keywords;
 
-    void init();
+    boost::log::trivial::severity_level init(const po::variables_map &vm);
 
 }
 

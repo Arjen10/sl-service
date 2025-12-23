@@ -14,6 +14,7 @@
 #include "sl_listener.hpp"
 
 namespace net = boost::asio;
+namespace po = boost::program_options;
 
 class app {
 public:
@@ -21,6 +22,7 @@ public:
     ~app();
     int run();
 private:
+    void argc_to_vm();
     void setup_logger();
     void load_config();
     void ioc_init();
@@ -30,6 +32,7 @@ private:
 private:
     int _argc;
     char** _argv;
+    po::variables_map _vm;
     std::unique_ptr<net::io_context> _ioc;
     std::vector<std::thread> _threads;
     std::shared_ptr<sl_listener> _listener;

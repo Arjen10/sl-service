@@ -11,6 +11,7 @@ void server::init(const YAML::Node &node) {
     this->_port = node["port"].as<uint16_t>(4399);
     this->_session.init(node["session"]);
     this->_thread.init(node["thread"]);
+    this->_boost_log.init(node["log"]);
 }
 
 const std::string &server::get_listen_ip() const {
@@ -29,6 +30,10 @@ const thread &server::get_thread() const {
     return _thread;
 }
 
+const boost_log &server::get_log() const {
+    return _boost_log;
+}
+
 void session::init(const YAML::Node &node) {
     this->_max_buffer = node["max-buffer"].as<std::size_t>(2028);
     this->_reader_idle_time_out = node["reader-idle-time-out"].as<std::size_t>(900);
@@ -43,15 +48,17 @@ size_t session::get_reader_idle_time_out() const {
 }
 
 void thread::init(const YAML::Node &node) {
-    this->_asio_ioc = node["asio-ioc"].as<std::size_t>(2);
-    this->_pool = node["pool"].as<std::size_t>(2);
+    auto asio_ioc_v = node["asio-ioc"].as<std::uint16_t>(1);
+    this->_asio_ioc = std::max(asio_ioc_v, std::uint16_t{1});
+    auto pool_v = node["pool"].as<std::uint16_t>(1);
+    this->_pool = std::max(pool_v, std::uint16_t{1});
 }
 
-size_t thread::asio_ioc() const {
+std::uint16_t thread::asio_ioc() const {
     return _asio_ioc;
 }
 
-size_t thread::pool() const {
+std::uint16_t thread::pool() const {
     return _pool;
 }
 
@@ -180,4 +187,22 @@ const std::string &mqtt::get_topic_prefix() const {
 
 const boost::mqtt5::qos_e &mqtt::get_qos() const {
     return _qos;
+}
+
+void boost_log::init(const YAML::Node &node) {
+    if (node.IsNull()) {
+        this->_level = boost::log::trivial::info;
+        return;
+    }
+    auto ln = node["level"];
+    if (!ln.IsDefined()) {
+        // 默认 info 就好
+        this->_level = boost::log::trivial::info;
+        return;
+    }
+    this->_level = ln.as<boost::log::trivial::severity_level>();
+}
+
+boost::log::trivial::severity_level boost_log::level() {
+    return this->_level;
 }
