@@ -323,7 +323,7 @@ namespace sl651_2014::codec {
                 c_ptr->_raw_list.emplace_back(hex_reader, 1, expand_note, true);
                 auto v_str = temp_opt ? std::to_string(temp_opt.value()) : "null";
                 c_ptr->_raw_list.emplace_back(hex_reader, data_len, expand_note + "  取值", v_str, true);
-                LOG_DEBUG << " 不支持的标识符 " << oss.str() << " 值 " << v_str;
+                LOG_WARN << " 不支持的标识符 " << oss.str() << " 值 " << v_str;
             } catch (std::exception &e) {
                 LOG_ERROR << e.what();
                 throw e;
