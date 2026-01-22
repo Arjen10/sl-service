@@ -12,6 +12,8 @@
 #include <boost/asio/buffer.hpp>
 #include <boost/date_time.hpp>
 
+#include <cstdint>
+
 /**
  * 字节缓冲读取小助手
  */
@@ -71,7 +73,7 @@ public:
      * 读取一个无符号位整数
      * @param byte 字节引用
      */
-    void read_byte(u_int8_t &byte);
+    void read_byte(std::uint8_t &byte);
 
     /**
      * 读取指定长度的字节
