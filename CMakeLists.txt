@@ -25,6 +25,11 @@ target_include_directories(
         ${Boost_INCLUDE_DIRS}
 )
 
+if (MSVC)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_USE_WINAPI_VERSION=0x0602)
+    target_compile_options(${PROJECT_NAME} PRIVATE /utf-8 /bigobj)
+endif()
+
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
         Boost::log

@@ -28,7 +28,7 @@ void byte_buf_reader::get_bytes(std::vector<int8_t> &bytes, std::size_t start, s
     }
 }
 
-void byte_buf_reader::read_byte(u_int8_t &byte) {
+void byte_buf_reader::read_byte(std::uint8_t &byte) {
     byte = p_[read_index_++];
 }
 

@@ -113,7 +113,7 @@ namespace sl651_2014 {
         this->full_msg.append("sl651_2014解析异常 ----> ").append(msg);
     }
 
-    const char *error::what() const _NOEXCEPT {
+    const char *error::what() const noexcept {
         return full_msg.c_str();
     }
 }
