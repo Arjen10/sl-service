@@ -13,7 +13,7 @@
 #define JSON_FIELD_REF(j, obj, field) j[#field] = obj.field
 
 namespace boost::posix_time {
-void to_json(nlohmann::json& j, const boost::posix_time::ptime& ptime);
+    void to_json(nlohmann::json& j, const boost::posix_time::ptime& ptime);
 }
 
 #endif // SL_SERVICE_JSON_SER_DESER_HPP

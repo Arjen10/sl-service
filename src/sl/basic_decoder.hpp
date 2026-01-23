@@ -27,18 +27,18 @@ using crc_value_t = std::variant<int16_t, int8_t>;
 
 namespace callback {
 
-namespace chrono = std::chrono;
+    namespace chrono = std::chrono;
 
-/**
- * 回调函数
- */
-using func = std::function<void(const std::string& stcd, const nlohmann::json& h_j, const nlohmann::json& c_j,
-                                const nlohmann::json& e_j)>;
+    /**
+     * 回调函数
+     */
+    using func = std::function<void(const std::string& stcd, const nlohmann::json& h_j, const nlohmann::json& c_j,
+                                    const nlohmann::json& e_j)>;
 
-/**
- * 存放标识符的解析函数，不要抛出异常打印日志即可
- */
-extern const std::unordered_map<method, func> _map;
+    /**
+     * 存放标识符的解析函数，不要抛出异常打印日志即可
+     */
+    extern const std::unordered_map<method, func> _map;
 
 } // namespace callback
 

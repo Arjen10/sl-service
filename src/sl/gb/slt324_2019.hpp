@@ -182,187 +182,187 @@ class work_state : public wr_rtu_mon_r {
  */
 namespace hyd {
 
-namespace ri {
-/**
- * 水温表，32 页
- */
-class obwt_w {
+    namespace ri {
+        /**
+         * 水温表，32 页
+         */
+        class obwt_w {
 
-  public:
-    /**
-     * 构造这个对象，必须要一个站码
-     * @param stcd
-     */
-    explicit obwt_w(std::string stcd);
+          public:
+            /**
+             * 构造这个对象，必须要一个站码
+             * @param stcd
+             */
+            explicit obwt_w(std::string stcd);
 
-    /**
-     * 测站编码
-     */
-    std::string _stcd;
+            /**
+             * 测站编码
+             */
+            std::string _stcd;
 
-    /**
-     * 时间
-     */
-    boost::posix_time::ptime _tm;
+            /**
+             * 时间
+             */
+            boost::posix_time::ptime _tm;
 
-    /**
-     * 测点相对位置，测点深和水深的比值
-     * 交给业务端进行计算
-     */
-    std::optional<std::string> _mprp;
+            /**
+             * 测点相对位置，测点深和水深的比值
+             * 交给业务端进行计算
+             */
+            std::optional<std::string> _mprp;
 
-    /**
-     * 水温
-     */
-    std::optional<double> _wtmp;
+            /**
+             * 水温
+             */
+            std::optional<double> _wtmp;
 
-    /**
-     * 水温注解码，由水温观测物符号和可靠性符号组成
-     */
-    std::optional<std::string> _wtmprcd;
+            /**
+             * 水温注解码，由水温观测物符号和可靠性符号组成
+             */
+            std::optional<std::string> _wtmprcd;
 
-  public:
-    friend void to_json(nlohmann::json& j, const obwt_w& awqmd);
-};
+          public:
+            friend void to_json(nlohmann::json& j, const obwt_w& awqmd);
+        };
 
-/**
- * 水质自动监测数据，SLT 324-2019 44 页
- */
-class wqamd_w : public base_extended {
+        /**
+         * 水质自动监测数据，SLT 324-2019 44 页
+         */
+        class wqamd_w : public base_extended {
 
-  public:
-    /**
-     * 构造这个对象，必须要一个站码
-     * @param stcd
-     */
-    explicit wqamd_w(std::string stcd);
+          public:
+            /**
+             * 构造这个对象，必须要一个站码
+             * @param stcd
+             */
+            explicit wqamd_w(std::string stcd);
 
-    std::string _stcd;
+            std::string _stcd;
 
-    /**
-     * 采样时间
-     */
-    boost::posix_time::ptime _spt;
+            /**
+             * 采样时间
+             */
+            boost::posix_time::ptime _spt;
 
-    /**
-     * pH值
-     */
-    std::optional<double> _ph;
+            /**
+             * pH值
+             */
+            std::optional<double> _ph;
 
-    /**
-     * 电导率
-     */
-    std::optional<double> _cond;
+            /**
+             * 电导率
+             */
+            std::optional<double> _cond;
 
-    /**
-     * 浑浊度
-     */
-    std::optional<double> _turb;
+            /**
+             * 浑浊度
+             */
+            std::optional<double> _turb;
 
-    /**
-     * 溶解氧
-     */
-    std::optional<double> _dox;
+            /**
+             * 溶解氧
+             */
+            std::optional<double> _dox;
 
-    /**
-     * 高锰酸盐指数
-     */
-    std::optional<double> _codmn;
+            /**
+             * 高锰酸盐指数
+             */
+            std::optional<double> _codmn;
 
-    /**
-     * 化学需氧量
-     */
-    std::optional<double> _codcr;
+            /**
+             * 化学需氧量
+             */
+            std::optional<double> _codcr;
 
-    /**
-     * 总氮
-     */
-    std::optional<double> _tn;
+            /**
+             * 总氮
+             */
+            std::optional<double> _tn;
 
-    /**
-     * 氨氮
-     */
-    std::optional<double> _nh3n;
+            /**
+             * 氨氮
+             */
+            std::optional<double> _nh3n;
 
-    /**
-     * 亚硝酸盐氮
-     */
-    std::optional<double> _no2;
+            /**
+             * 亚硝酸盐氮
+             */
+            std::optional<double> _no2;
 
-    /**
-     * 硝酸盐氮
-     */
-    std::optional<double> _no3;
+            /**
+             * 硝酸盐氮
+             */
+            std::optional<double> _no3;
 
-    /**
-     * 总磷
-     */
-    std::optional<double> _tp;
+            /**
+             * 总磷
+             */
+            std::optional<double> _tp;
 
-    /**
-     * 总有机碳
-     */
-    std::optional<double> _toc;
+            /**
+             * 总有机碳
+             */
+            std::optional<double> _toc;
 
-    /**
-     * 挥发酚
-     */
-    std::optional<double> _vlph;
+            /**
+             * 挥发酚
+             */
+            std::optional<double> _vlph;
 
-    /**
-     * 叶绿素a
-     */
-    std::optional<double> _chla;
+            /**
+             * 叶绿素a
+             */
+            std::optional<double> _chla;
 
-    /**
-     * 氟化物
-     */
-    std::optional<double> _f;
+            /**
+             * 氟化物
+             */
+            std::optional<double> _f;
 
-    /**
-     * 砷
-     */
-    std::optional<double> _ars;
+            /**
+             * 砷
+             */
+            std::optional<double> _ars;
 
-    /**
-     * 汞
-     */
-    std::optional<double> _hg;
+            /**
+             * 汞
+             */
+            std::optional<double> _hg;
 
-    /**
-     * 六价铬
-     */
-    std::optional<double> _cr6;
+            /**
+             * 六价铬
+             */
+            std::optional<double> _cr6;
 
-    /**
-     * 铜
-     */
-    std::optional<double> _cu;
+            /**
+             * 铜
+             */
+            std::optional<double> _cu;
 
-    /**
-     * 铅
-     */
-    std::optional<double> _pb;
+            /**
+             * 铅
+             */
+            std::optional<double> _pb;
 
-    /**
-     * 镉
-     */
-    std::optional<double> _cd;
+            /**
+             * 镉
+             */
+            std::optional<double> _cd;
 
-    /**
-     * 锌
-     */
-    std::optional<double> _zn;
+            /**
+             * 锌
+             */
+            std::optional<double> _zn;
 
-    /**
-     * 锑
-     */
-    std::optional<double> _sb;
+            /**
+             * 锑
+             */
+            std::optional<double> _sb;
 
-  public:
-    friend void to_json(nlohmann::json& j, const wqamd_w& awqmd);
-};
-} // namespace ri
+          public:
+            friend void to_json(nlohmann::json& j, const wqamd_w& awqmd);
+        };
+    } // namespace ri
 
 } // namespace hyd
 

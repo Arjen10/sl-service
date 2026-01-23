@@ -29,32 +29,32 @@
  */
 namespace conf {
 
-namespace po = boost::program_options;
+    namespace po = boost::program_options;
 
-class sl : public singleton_template<sl> {
-  private:
-    server _server;
-    call_back _callback;
-    sl() = default;
-    friend class singleton_template<sl>;
+    class sl : public singleton_template<sl> {
+      private:
+        server _server;
+        call_back _callback;
+        sl() = default;
+        friend class singleton_template<sl>;
 
-  public:
-    void init(const po::variables_map& vm);
-    const server& get_server() const;
-    const call_back& get_callback() const;
-};
+      public:
+        void init(const po::variables_map& vm);
+        const server& get_server() const;
+        const call_back& get_callback() const;
+    };
 
 } // namespace conf
 
 namespace logger {
 
-namespace po = boost::program_options;
+    namespace po = boost::program_options;
 
-namespace logging = boost::log;
-namespace expr = boost::log::expressions;
-namespace keywords = boost::log::keywords;
+    namespace logging = boost::log;
+    namespace expr = boost::log::expressions;
+    namespace keywords = boost::log::keywords;
 
-boost::log::trivial::severity_level init(const po::variables_map& vm);
+    boost::log::trivial::severity_level init(const po::variables_map& vm);
 
 } // namespace logger
 
