@@ -2,10 +2,9 @@
 // Created by Arjen on 2025/1/24.
 //
 
-#include "szy302_2017.hpp"
+#include "slt324_2019.hpp"
 
-work_state::work_state(short waring_status)
-{
+work_state::work_state(short waring_status) {
     acpwr_cond = (waring_status >> 15 & 0x1) == 1;
     bat_v_warm = (waring_status >> 14 & 0x1) == 1;
     // 设置其他状态
@@ -25,12 +24,26 @@ work_state::work_state(short waring_status)
     oth_warm = z || q || wq || qd || wp || zp || h || t || sv || rwv;
 }
 
-wq::wq_awqmd_d::wq_awqmd_d(const std::string &stcd) : _stcd(stcd) {
-    _ts = boost::posix_time::second_clock::local_time();
+hyd::ri::obwt_w::obwt_w(std::string stcd)
+        : _stcd(std::move(stcd)) {
 
 }
 
-void wq::to_json(nlohmann::json &j, const wq_awqmd_d &awqmd) {
+void hyd::ri::to_json(nlohmann::json &j, const obwt_w &obwt) {
+    j = nlohmann::json::object();
+    JSON_FIELD_REF(j, obwt, _stcd);
+    JSON_FIELD_REF(j, obwt, _tm);
+    JSON_FIELD_REF(j, obwt, _mprp);
+    JSON_FIELD_REF(j, obwt, _wtmp);
+    JSON_FIELD_REF(j, obwt, _wtmprcd);
+}
+
+hyd::ri::wqamd_w::wqamd_w(std::string stcd)
+        : _stcd(std::move(stcd)) {
+
+}
+
+void hyd::ri::to_json(nlohmann::json &j, const wqamd_w &awqmd) {
     j = nlohmann::json::object();
     JSON_FIELD_REF(j, awqmd, _stcd);
     JSON_FIELD_REF(j, awqmd, _spt);
@@ -54,12 +67,7 @@ void wq::to_json(nlohmann::json &j, const wq_awqmd_d &awqmd) {
     JSON_FIELD_REF(j, awqmd, _turb);
     JSON_FIELD_REF(j, awqmd, _cond);
     JSON_FIELD_REF(j, awqmd, _ph);
-    JSON_FIELD_REF(j, awqmd, _wt);
     JSON_FIELD_REF(j, awqmd, _sb);
     JSON_FIELD_REF(j, awqmd, _zn);
     JSON_FIELD_REF(j, awqmd, _cd);
-    JSON_FIELD_REF(j, awqmd, _test_com_tm);
-    JSON_FIELD_REF(j, awqmd, _ts);
-    JSON_FIELD_REF(j, awqmd, _spe_reg_data);
-    JSON_FIELD_REF(j, awqmd, _extended);
 }

@@ -141,6 +141,7 @@ namespace sl651_2014::model {
         JSON_FIELD_PTR(j, c, _v);
         JSON_FIELD_PTR(j, c, _awqmd);
         JSON_FIELD_PTR(j, c, _raw_list);
+        JSON_FIELD_PTR(j, c, _extended);
     }
 
     void to_json(nlohmann::json &j, const e_shared_ptr &e) {
@@ -150,30 +151,16 @@ namespace sl651_2014::model {
         JSON_FIELD_PTR(j, e, _raw_list);
     }
 
-    void content::init(const station_type &station_type, c_shared_ptr &c) {
-        this->_station_type = station_type;
-        switch (station_type) {
-            case wq:
+    void content::init(const c_shared_ptr &c) {
+        switch (c->_station_type) {
+            case station_type::wq: {
                 this->_awqmd.emplace(c->_stcd);
+                this->_obwt.emplace(c->_stcd);
                 return;
-            case rr:
-            case pp:
-                // todo 这里需要初始化不同的类，避免空引用
-            case zq_zz:
-            default:
-                throw sl651_2014::error("获取测站类型错误！");
-        }
-    }
-
-    std::unordered_map<std::string, std::optional<double>> &content::expand_map() {
-        switch (this->_station_type) {
-            case wq:
-                return this->_awqmd->_extended;
+            }
             case rr:
             case pp:
             case zq_zz:
-            default:
-                throw sl651_2014::error("获取测站类型错误！");
         }
     }
 
@@ -285,13 +272,20 @@ namespace sl651_2014::codec {
 
         // 开始处理测站类型 1个字节
         int8_t station_type_lead_symbol = reader.read_byte();
-        auto st = static_cast<model::station_type>(station_type_lead_symbol);
-        // 执行初始化
-        c_ptr->init(st, c_ptr);
+        c_ptr->_station_type = static_cast<model::station_type>(station_type_lead_symbol);
         temp_j.clear();
-        json::to_json(temp_j, st);
+        json::to_json(temp_j, c_ptr->_station_type);
         c_ptr->_raw_list.emplace_back(hex_reader, STATION_TYPE_LEN, STATION_TYPE_NOTE, temp_j);
         std::optional<double> temp_opt;
+        // 观测时间标识符
+        int8_t tt_symbol = reader.read_byte();
+        auto tt_key = static_cast<model::data_type>(tt_symbol);
+        if (parse::strategy.count(tt_key) == 0) {
+            throw sl651_2014::error("获取观测时间错误！");
+        }
+        parse::strategy.at(tt_key)(reader, hex_reader, c_ptr);
+        // 有了观测时间执行初始化
+        c_ptr->init(c_ptr);
         // 开始处理不定长部分
         while (true) {
             // 可读字节等于 0 直接返回
@@ -316,7 +310,7 @@ namespace sl651_2014::codec {
             try {
                 std::ostringstream oss;
                 oss << std::setw(2) << std::setfill('0') << std::hex << (int32_t) element_lead_symbol;
-                auto &expand_map = c_ptr->expand_map();
+                auto &expand_map = c_ptr->_extended;
                 // 这里存入 hex 编码
                 expand_map.emplace(oss.str(), temp_opt);
                 std::string expand_note = "拓展标识符 " + oss.str();
@@ -491,7 +485,7 @@ namespace sl651_2014::parse {
              */
             {model::data_type::tt,    [](byte_buf_reader &reader,
                                          byte_buf_reader &hex_reader,
-                                         std::shared_ptr<model::content> &content) {
+                                         model::c_shared_ptr &content) {
                 auto &back = content->_raw_list.back();
                 std::string temp;
                 hex_reader.read_hex_str(temp, 1);
@@ -504,14 +498,7 @@ namespace sl651_2014::parse {
                     throw sl651_2014::error("错误的观测时间标识符 ");
                 }
                 // 临时时间指针，sl651里面明确规定了时间的长度，需要减少重复代码
-                boost::posix_time::ptime *tm_ptr = nullptr;
-                switch (content->_station_type) {
-                    case model::station_type::wq:
-                        tm_ptr = &content->_awqmd->_spt;
-                        break;
-                    default:
-                        throw sl651_2014::error("未支持的测站类型");
-                }
+                boost::posix_time::ptime *tm_ptr = &content->_obs_tm;
                 // 观测时间读取五个字节
                 reader.read_tm(*tm_ptr, 5);
                 // 处理报文取值
@@ -556,11 +543,11 @@ namespace sl651_2014::parse {
             {model::data_type::c,     [](byte_buf_reader &reader,
                                          byte_buf_reader &hex_reader,
                                          std::shared_ptr<model::content> &content) {
-                auto &wt_opt = content->_awqmd->_wt;
-                uint32_t data_len = parse_data(reader, wt_opt);
-                handle_v(content, hex_reader, data_len, model::data_type::c, wt_opt);
-                if (wt_opt.has_value()) {
-                    LOG_DEBUG << " 瞬时水温 " << wt_opt.value();
+                auto &wtmp_opt = content->_obwt->_wtmp;
+                auto data_size = parse_data(reader, wtmp_opt);
+                handle_v(content, hex_reader, data_size, model::data_type::c, wtmp_opt);
+                if (wtmp_opt.has_value()) {
+                    LOG_DEBUG << " 瞬时水温 " << wtmp_opt.value();
                 }
             }},
 
@@ -635,22 +622,8 @@ namespace sl651_2014::parse {
             }},
 
             /**
-             * 叶绿素a
-             */
-            {model::data_type::chla,  [](byte_buf_reader &reader,
-                                         byte_buf_reader &hex_reader,
-                                         std::shared_ptr<model::content> &content) {
-                auto &chla_opt = content->_awqmd->_chla;
-                auto data_len = parse_data(reader, chla_opt);
-                handle_v(content, hex_reader, data_len, model::data_type::chla, chla_opt);
-                if (chla_opt.has_value()) {
-                    LOG_DEBUG << " 叶绿素a " << chla_opt.value();
-                }
-            }},
-
-            /**
-             * 高锰酸盐浓度
-             */
+            * 高锰酸盐指数
+            */
             {model::data_type::codmn, [](byte_buf_reader &reader,
                                          byte_buf_reader &hex_reader,
                                          std::shared_ptr<model::content> &content) {
@@ -658,7 +631,7 @@ namespace sl651_2014::parse {
                 auto data_len = parse_data(reader, codmn_opt);
                 handle_v(content, hex_reader, data_len, model::data_type::codmn, codmn_opt);
                 if (codmn_opt.has_value()) {
-                    LOG_DEBUG << " 高锰酸盐浓度 " << codmn_opt.value();
+                    LOG_DEBUG << " 高锰酸盐指数 " << codmn_opt.value();
                 }
             }},
 
@@ -693,7 +666,7 @@ namespace sl651_2014::parse {
             }},
 
             /**
-             * 总磷
+             * 总氮
              */
             {model::data_type::tn,    [](byte_buf_reader &reader,
                                          byte_buf_reader &hex_reader,
@@ -706,6 +679,79 @@ namespace sl651_2014::parse {
                     LOG_DEBUG << " 总氮 " << tn_opt.value();
                 }
             }},
+
+            /**
+             * 有机总碳
+             */
+            {model::data_type::toc,    [](byte_buf_reader &reader,
+                                         byte_buf_reader &hex_reader,
+                                         std::shared_ptr<model::content> &content) {
+                // 这里是按照标准建表
+                auto &tn_opt = content->_awqmd->_toc;
+                auto data_len = parse_data(reader, tn_opt);
+                handle_v(content, hex_reader, data_len, model::data_type::toc, tn_opt);
+                if (tn_opt.has_value()) {
+                    LOG_DEBUG << " 有机总碳 " << tn_opt.value();
+                }
+            }},
+
+            /**
+             * 铜
+             */
+            {model::data_type::cu,    [](byte_buf_reader &reader,
+                                         byte_buf_reader &hex_reader,
+                                         std::shared_ptr<model::content> &content) {
+                auto &tn_opt = content->_awqmd->_cu;
+                auto data_len = parse_data(reader, tn_opt);
+                handle_v(content, hex_reader, data_len, model::data_type::cu, tn_opt);
+                if (tn_opt.has_value()) {
+                    LOG_DEBUG << " 铜 " << tn_opt.value();
+                }
+            }},
+
+            /**
+             * 锌
+             */
+            {model::data_type::zn,    [](byte_buf_reader &reader,
+                                         byte_buf_reader &hex_reader,
+                                         std::shared_ptr<model::content> &content) {
+                auto &zn_opt = content->_awqmd->_zn;
+                auto data_len = parse_data(reader, zn_opt);
+                handle_v(content, hex_reader, data_len, model::data_type::zn, zn_opt);
+                if (zn_opt.has_value()) {
+                    LOG_DEBUG << " 锌 " << zn_opt.value();
+                }
+            }},
+
+
+            /**
+             * 铅
+             */
+            {model::data_type::pb,    [](byte_buf_reader &reader,
+                                         byte_buf_reader &hex_reader,
+                                         std::shared_ptr<model::content> &content) {
+                auto &pb_opt = content->_awqmd->_pb;
+                auto data_len = parse_data(reader, pb_opt);
+                handle_v(content, hex_reader, data_len, model::data_type::pb, pb_opt);
+                if (pb_opt.has_value()) {
+                    LOG_DEBUG << " 铅 " << pb_opt.value();
+                }
+            }},
+
+            /**
+             * 叶绿素a
+             */
+            {model::data_type::chla,  [](byte_buf_reader &reader,
+                                         byte_buf_reader &hex_reader,
+                                         std::shared_ptr<model::content> &content) {
+                auto &chla_opt = content->_awqmd->_chla;
+                auto data_len = parse_data(reader, chla_opt);
+                handle_v(content, hex_reader, data_len, model::data_type::chla, chla_opt);
+                if (chla_opt.has_value()) {
+                    LOG_DEBUG << " 叶绿素a " << chla_opt.value();
+                }
+            }},
+
 
     };
 

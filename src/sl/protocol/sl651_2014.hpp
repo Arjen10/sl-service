@@ -12,7 +12,7 @@
 #include <nlohmann/json.hpp>
 
 #include "../basic_decoder.hpp"
-#include "../gb/szy302_2017.hpp"
+#include "../gb/slt324_2019.hpp"
 #include "../../core/json_ser_deser.hpp"
 #include "../../core/except.hpp"
 
@@ -263,6 +263,9 @@ namespace sl651_2014 {
             // 瞬时水温
             c = 0x03,
 
+            // 时间步长码，未测试
+            drxnn = 0x04,
+
             // 1小时内 5 分钟时段雨量
             drp = static_cast<int8_t>(0xF4),
 
@@ -286,11 +289,11 @@ namespace sl651_2014 {
             // 浊度
             turb = 0x49,
 
-            // 叶绿素
-            chla = 0x57,
-
-            // 高锰酸盐浓度
+            // 高锰酸盐指数
             codmn = 0x4A,
+
+            // 氧还原电位，未测试
+            redox = 0x4B,
 
             // 氨氮
             nh4n = 0x4C,
@@ -300,6 +303,33 @@ namespace sl651_2014 {
 
             // 总氮
             tn = 0x4E,
+
+            // 有机总碳
+            toc = 0x4F,
+
+            // 铜，未测试
+            cu = 0x50,
+
+            // 锌，未测试
+            zn = 0x51,
+
+            // 硒，未测试
+            se = 0x52,
+
+            // 砷，未测试
+            as = 0x53,
+
+            // 总汞，未测试
+            thg = 0x54,
+
+            // 镉，未测试
+            cd = 0x55,
+
+            // 铅，未测试
+            pb = 0x56,
+
+            // 叶绿素
+            chla = 0x57,
 
         };
 
@@ -312,10 +342,14 @@ namespace sl651_2014 {
 
         public:
 
-            // 中心地址
+            /**
+             * 中心地址
+             */
             int8_t _central_address;
 
-            // 遥测站地址
+            /**
+             * 遥测站地址
+             */
             std::string _rtu_stcd;
 
             // 密码
@@ -346,35 +380,57 @@ namespace sl651_2014 {
 
         public:
 
-            // 流水号
+            /**
+             * 流水号
+             */
             int16_t _serial_num;
 
-            // 数据上报时间。此时间一般要比遥测时间晚一点，取决于设备的性能
+            /**
+             * 数据上报时间。此时间一般要比观测时间晚一点，取决于设备的性能
+             */
             boost::posix_time::ptime _report_tm;
 
-            // 测站编码
+            /**
+             * 观测时间
+             */
+            boost::posix_time::ptime _obs_tm;
+
+            /**
+             * 测站编码
+             */
             std::string _stcd;
 
-            // 测站类型
+            /**
+             * 测站类型
+             */
             station_type _station_type;
 
-            // 电压
+            /**
+             * 电压
+             */
             std::optional<std::double_t> _v;
 
-            // 水质数据封装
-            std::optional<wq::wq_awqmd_d> _awqmd;
+            /**
+             * 水质数据封装
+             */
+            std::optional<hyd::ri::wqamd_w> _awqmd;
+
+            /**
+             * 水温数据封装
+             */
+            std::optional<hyd::ri::obwt_w> _obwt;
+
+            /**
+             * 非标准表字段，这里只是拓展属性，交给业务端处理
+             */
+            std::unordered_map<std::string, std::optional<double>> _extended;
 
         private:
 
             /**
              * 初始化
              */
-            void init(const station_type &station_type, std::shared_ptr<sl651_2014::model::content> &c);
-
-            /**
-             * 获取拓展 map
-             */
-            std::unordered_map<std::string, std::optional<double>> &expand_map();
+            void init(const c_shared_ptr &c);
 
         public:
             friend void to_json(nlohmann::json &j, const std::shared_ptr<content> &c);
@@ -388,10 +444,14 @@ namespace sl651_2014 {
             friend codec::decoder;
         private:
 
-            // 结束符
+            /**
+             * 结束符
+             */
             int8_t _end_note;
 
-            // crc 校验符
+            /**
+             * crc 校验符
+             */
             int16_t _crc;
 
         public:
