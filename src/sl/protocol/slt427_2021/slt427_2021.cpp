@@ -3,9 +3,9 @@
 ////
 //
 //
-//#include "slt427_2021.hpp"
+// #include "slt427_2021.hpp"
 //
-//slt427_2021::device_status::device_status(short status_short) {
+// slt427_2021::device_status::device_status(short status_short) {
 //    status = static_cast<unsigned char>((status_short >> 14) & 0x2);  // 保留高 2 位
 //    ic = ((status_short >> 13) & 0x1) == 0;  // 检查倒数第 14 位
 //    sv = ((status_short >> 12) & 0x1) == 0;  // 检查倒数第 13 位
@@ -14,25 +14,25 @@
 //    v = static_cast<unsigned char>((status_short >> 9) & 0x1);  // 保留第 10 位
 //}
 //
-//size_t slt427_2021::decoder::header_max_len() {
+// size_t slt427_2021::decoder::header_max_len() {
 //    // 当是普通报文时，这里的头部长度最长为3
 //    // 当时图片报文时，这里的头部长度最长为11
 //    // 两者取最大，就是11
 //    return 3;
 //}
 //
-//size_t slt427_2021::decoder::content_length(const boost::asio::const_buffer &buffer) {
+// size_t slt427_2021::decoder::content_length(const boost::asio::const_buffer &buffer) {
 //    byte_buf_reader r(buffer);
 //    char c;
 //    r.get_byte(c, 1);
 //    return static_cast<unsigned char>(c);
 //}
 //
-//size_t slt427_2021::decoder::end_length() {
+// size_t slt427_2021::decoder::end_length() {
 //    return 2;
 //}
 //
-//bool slt427_2021::decoder::version_by_buf(const boost::asio::const_buffer &buffer) {
+// bool slt427_2021::decoder::version_by_buf(const boost::asio::const_buffer &buffer) {
 //    byte_buf_reader r(buffer);
 //    char c;
 //    r.read_byte(c);
@@ -44,7 +44,7 @@
 // * @param content 正文对象
 // * @param data 字节指针
 // */
-//void control_area(std::unique_ptr<slt427_2021::content> &content, byte_buf_reader &reader_helper) {
+// void control_area(std::unique_ptr<slt427_2021::content> &content, byte_buf_reader &reader_helper) {
 //    char c;
 //    reader_helper.read_byte(c);
 //    auto dir = (char) (c > 0 ? 0 : 1);
@@ -70,7 +70,7 @@
 // * @param content 正文对象
 // * @param data 字节指针
 // */
-//void parse_mpcd(std::unique_ptr<slt427_2021::content> &content, byte_buf_reader &reader_helper) {
+// void parse_mpcd(std::unique_ptr<slt427_2021::content> &content, byte_buf_reader &reader_helper) {
 //    std::vector<char> stcd_v;
 //    // 五字节大小
 //    // 有些时候他是 00 ，我们这里无需处理，下面hex自会出手
@@ -84,7 +84,7 @@
 // * @param content 正文对象
 // * @param data 字节指针
 // */
-//void parse_afn(std::unique_ptr<slt427_2021::content> &content, byte_buf_reader &reader_helper) {
+// void parse_afn(std::unique_ptr<slt427_2021::content> &content, byte_buf_reader &reader_helper) {
 //    // 兼容用户自定义afn，当afn为0xFF时，afn为用户自定义，我们需要再读一次，共计两字节
 //    reader_helper.read_byte(content->afn);
 //    if (content->afn == (char) 0xFF) {
@@ -100,7 +100,7 @@
 // * @param content 正文对象
 // * @param reader_helper
 // */
-//void parse_tm(std::unique_ptr<slt427_2021::content> &content, byte_buf_reader &reader_helper) {
+// void parse_tm(std::unique_ptr<slt427_2021::content> &content, byte_buf_reader &reader_helper) {
 //    LOG_DEBUG << reader_helper.debug();
 //    // ss mm HH dd MM yy 格式
 //    std::string str_tmp;
@@ -129,7 +129,7 @@
 // * @param content 正文对象
 // * @param data 字节指针
 // */
-//void parse_content(std::unique_ptr<slt427_2021::header> &h,
+// void parse_content(std::unique_ptr<slt427_2021::header> &h,
 //                   std::unique_ptr<slt427_2021::content> &content,
 //                   sl_full_buf &sl_full_buf) {
 //    // 68 1C 68
@@ -155,7 +155,7 @@
 //    parse_tm(content, reader_helper);
 //}
 //
-//void parse_header(std::unique_ptr<slt427_2021::header> &h, sl_full_buf &sl_full_buf) {
+// void parse_header(std::unique_ptr<slt427_2021::header> &h, sl_full_buf &sl_full_buf) {
 //    byte_buf_reader reader_helper(*sl_full_buf.content());
 //    reader_helper.read_byte(h->frame_start_);
 //    reader_helper.read_byte(h->content_length_);
@@ -168,24 +168,24 @@
 // * @param content 正文对象
 // * @param e 结束对象
 // */
-//void parse_end(std::unique_ptr<slt427_2021::end> &e, sl_full_buf &sl_full_buf) {
+// void parse_end(std::unique_ptr<slt427_2021::end> &e, sl_full_buf &sl_full_buf) {
 //    byte_buf_reader reader_helper(*sl_full_buf.end());
 //    reader_helper.read_byte(e->crc_);
 //    reader_helper.read_byte(e->end_byte_);
 //}
 //
-//slt427_2021::decoder::decoder()
+// slt427_2021::decoder::decoder()
 //        : state_(decode_state::read_header), header_(std::make_unique<header>()),
 //          content_(std::make_unique<content>()), end_(std::make_unique<end>()) {
 //
 //}
 //
-//std::string slt427_2021::decoder::protocol_name() {
+// std::string slt427_2021::decoder::protocol_name() {
 //    static const std::string protocol_name = "slt427_2021";
 //    return protocol_name;
 //}
 //
-//std::any slt427_2021::decoder::crc_calculate(const asio::const_buffer &header, const asio::const_buffer &content,
+// std::any slt427_2021::decoder::crc_calculate(const asio::const_buffer &header, const asio::const_buffer &content,
 //                                             const asio::const_buffer &end) {
 //    constexpr unsigned int polynomial = 0xe5;  // 多项式
 //    constexpr unsigned int initial_remainder = 0;  // 初始值
@@ -204,7 +204,8 @@
 //    return static_cast<char>(crc_calculator.checksum());
 //}
 //
-//bool slt427_2021::decoder::crc_check(const boost::asio::const_buffer &header, const boost::asio::const_buffer &content,
+// bool slt427_2021::decoder::crc_check(const boost::asio::const_buffer &header, const boost::asio::const_buffer
+// &content,
 //                                     const boost::asio::const_buffer &end) {
 //    auto calc_crc = this->crc_calculate(header, content, end);
 //    byte_buf_reader end_reader(end);
@@ -214,42 +215,43 @@
 //    return req_crc == std::any_cast<char>(calc_crc);
 //}
 //
-//void slt427_2021::decoder::parse(sl_full_buf sl_full_buf) {
+// void slt427_2021::decoder::parse(sl_full_buf sl_full_buf) {
 //    parse_header(this->header_, sl_full_buf);
 //    parse_content(this->header_, this->content_, sl_full_buf);
 //    parse_end(this->end_, sl_full_buf);
 //}
 //
 //
-//// ----------------------------------------header-----------------------------------------------------------------------
+////
+///----------------------------------------header-----------------------------------------------------------------------
 //
-//slt427_2021::header::header(char frame_start, unsigned char content_length, char content_start)
+// slt427_2021::header::header(char frame_start, unsigned char content_length, char content_start)
 //        : frame_start_(frame_start), content_length_(content_length), content_start_(content_start) {
 //
 //}
 //
-//char slt427_2021::header::frame_start() const {
+// char slt427_2021::header::frame_start() const {
 //    return this->frame_start_;
 //}
 //
-//unsigned char slt427_2021::header::content_length() const {
+// unsigned char slt427_2021::header::content_length() const {
 //    return this->content_length_;
 //}
 //
-//char slt427_2021::header::content_start() const {
+// char slt427_2021::header::content_start() const {
 //    return this->content_start_;
 //}
 //
-//slt427_2021::content::content() {
+// slt427_2021::content::content() {
 //    this->wr_mp_q_r = nullptr;
 //    this->work_state = nullptr;
 //    this->time = {};
 //}
 //
-//char slt427_2021::end::crc() const {
+// char slt427_2021::end::crc() const {
 //    return crc_;
 //}
 //
-//char slt427_2021::end::end_byte() const {
+// char slt427_2021::end::end_byte() const {
 //    return end_byte_;
 //}

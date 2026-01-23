@@ -6,7 +6,7 @@
 
 const protocol_factory::factory_map protocol_factory::_map = {
 
-        {SL651_2014_VER_HEX, []() { return std::make_shared<sl651_2014::codec::decoder>(); }},
+    {SL651_2014_VER_HEX, []() { return std::make_shared<sl651_2014::codec::decoder>(); }},
 
 };
 

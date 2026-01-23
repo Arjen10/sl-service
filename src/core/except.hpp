@@ -10,14 +10,14 @@
 
 namespace parse {
 
-    /**
-    * 解析异常类
-    */
-    class error : std::exception {
-    private:
-        std::string full_msg;
-    };
+/**
+ * 解析异常类
+ */
+class error : std::exception {
+  private:
+    std::string full_msg;
+};
 
-}
+} // namespace parse
 
-#endif //SL_SERVICE_EXCEPT_HPP
+#endif // SL_SERVICE_EXCEPT_HPP

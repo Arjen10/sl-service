@@ -14,8 +14,7 @@
 
 class sl_session_map {
 
-private:
-
+  private:
     /**
      * 锁
      */
@@ -28,8 +27,7 @@ private:
 
     sl_session_map() = default;
 
-public:
-
+  public:
     // 获取唯一实例
     static sl_session_map& instance();
 
@@ -38,7 +36,7 @@ public:
      * @param uuid uuid
      * @return 水利会话指针
      */
-    std::optional<std::shared_ptr<sl_session>> find_by_uuid(const std::string &uuid);
+    std::optional<std::shared_ptr<sl_session>> find_by_uuid(const std::string& uuid);
 
     /**
      * 线程安全的插入一个会话指针
@@ -50,8 +48,6 @@ public:
     sl_session_map(const sl_session_map&) = delete;
 
     sl_session_map& operator=(const sl_session_map&) = delete;
-
 };
 
-
-#endif //SL_SERVICE_SL_SESSION_MAP_HPP
+#endif // SL_SERVICE_SL_SESSION_MAP_HPP

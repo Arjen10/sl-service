@@ -5,8 +5,7 @@
 #ifndef SL_PARSER_BASE_HPP
 #define SL_PARSER_BASE_HPP
 
-enum class decode_state
-{
+enum class decode_state {
 
     /**
      * 头部读取
@@ -30,4 +29,4 @@ enum class decode_state
 
 };
 
-#endif //SL_PARSER_BASE_HPP
+#endif // SL_PARSER_BASE_HPP

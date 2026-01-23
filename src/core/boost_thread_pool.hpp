@@ -13,4 +13,4 @@
  */
 boost::asio::thread_pool& thread_pool();
 
-#endif //SL_SERVICE_BOOST_THREAD_POOL_HPP
+#endif // SL_SERVICE_BOOST_THREAD_POOL_HPP

@@ -20,21 +20,23 @@ class call_back;
 
 class http_cfg {
     friend call_back;
-private:
+
+  private:
     std::string _url;
     uint32_t _connect_time_out;
 
-public:
-    void init(const YAML::Node &node);
+  public:
+    void init(const YAML::Node& node);
 
-    const std::string &get_url() const;
+    const std::string& get_url() const;
 
     const uint32_t get_connect_time_out() const;
 };
 
 class mqtt {
     friend call_back;
-private:
+
+  private:
     std::string _broker_host;
     uint16_t _broker_port;
     std::string _client_id;
@@ -43,49 +45,51 @@ private:
     std::string _topic_prefix;
     boost::mqtt5::qos_e _qos;
 
-public:
-    void init(const YAML::Node &node);
+  public:
+    void init(const YAML::Node& node);
 
-    const std::string &get_broker_host() const;
+    const std::string& get_broker_host() const;
 
     const uint16_t get_broker_port() const;
 
     const std::string get_client_id() const;
 
-    const std::string &get_username() const;
+    const std::string& get_username() const;
 
-    const std::string &get_password() const;
+    const std::string& get_password() const;
 
-    const std::string &get_topic_prefix() const;
+    const std::string& get_topic_prefix() const;
 
-    const boost::mqtt5::qos_e &get_qos() const;
+    const boost::mqtt5::qos_e& get_qos() const;
 };
 
 class call_back {
     friend sl;
-private:
+
+  private:
     bool _enable;
     std::optional<method> _method;
     std::optional<http_cfg> _http_conf;
     std::optional<mqtt> _mqtt;
 
-public:
-    void init(const YAML::Node &node);
+  public:
+    void init(const YAML::Node& node);
     bool enable() const;
-    const std::optional<method> &get_callback_method() const;
-    const std::optional<http_cfg> &get_http_conf() const;
-    const std::optional<mqtt> &get_mqtt_conf() const;
+    const std::optional<method>& get_callback_method() const;
+    const std::optional<http_cfg>& get_http_conf() const;
+    const std::optional<mqtt>& get_mqtt_conf() const;
 };
 
 class session {
     friend server;
-private:
+
+  private:
     std::size_t _max_buffer;
     std::size_t _reader_idle_time_out;
 
-    void init(const YAML::Node &node);
+    void init(const YAML::Node& node);
 
-public:
+  public:
     size_t get_max_buffer() const;
 
     size_t get_reader_idle_time_out() const;
@@ -93,48 +97,50 @@ public:
 
 class thread {
     friend server;
-private:
+
+  private:
     std::uint16_t _asio_ioc;
     std::uint16_t _pool;
-    void init(const YAML::Node &node);
+    void init(const YAML::Node& node);
 
-public:
+  public:
     std::uint16_t asio_ioc() const;
     std::uint16_t pool() const;
 };
 
 class boost_log {
     friend server;
-private:
+
+  private:
     boost::log::trivial::severity_level _level;
-    void init(const YAML::Node &node);
-public:
+    void init(const YAML::Node& node);
+
+  public:
     boost::log::trivial::severity_level level();
 };
 
 class server {
     friend sl;
-private:
+
+  private:
     std::string _listen_ip;
     uint16_t _port;
     session _session;
     thread _thread;
     boost_log _boost_log;
 
-public:
-    void init(const YAML::Node &node);
+  public:
+    void init(const YAML::Node& node);
 
-    const std::string &get_listen_ip() const;
+    const std::string& get_listen_ip() const;
 
     uint16_t get_port() const;
 
-    const session &get_session() const;
+    const session& get_session() const;
 
-    const thread &get_thread() const;
+    const thread& get_thread() const;
 
-    const boost_log &get_log() const;
-
+    const boost_log& get_log() const;
 };
 
-
-#endif //SL_SERVICE_SERVER_CONFIG_HPP
+#endif // SL_SERVICE_SERVER_CONFIG_HPP

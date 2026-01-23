@@ -1,0 +1,40 @@
+BasedOnStyle: LLVM
+Language: Cpp
+
+# 缩进
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+# 行宽（LLVM 默认 80，工程项目建议放宽）
+ColumnLimit: 120
+
+# 大括号（LLVM 默认 Attach，这里仍保持 LLVM 习惯）
+BreakBeforeBraces: Attach
+
+# 控制语句
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+
+# 指针 / 引用
+PointerAlignment: Left
+ReferenceAlignment: Left
+DerivePointerAlignment: false
+
+# 空格规则
+SpaceBeforeParens: ControlStatements
+
+# 对齐
+AlignAfterOpenBracket: Align
+AlignOperands: Align
+AlignTrailingComments: true
+
+# include
+SortIncludes: false
+
+# namespace（LLVM 风格）
+NamespaceIndentation: None
+
+# 注释
+ReflowComments: true

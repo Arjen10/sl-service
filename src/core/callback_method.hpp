@@ -24,4 +24,4 @@ enum method : uint16_t {
 
 };
 
-#endif //SL_SERVICE_CALLBACK_METHOD_HPP
+#endif // SL_SERVICE_CALLBACK_METHOD_HPP

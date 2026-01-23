@@ -17,11 +17,12 @@ namespace net = boost::asio;
 namespace po = boost::program_options;
 
 class app {
-public:
+  public:
     explicit app(int argc, char* argv[]);
     ~app();
     int run();
-private:
+
+  private:
     void argc_to_vm();
     void setup_logger();
     void load_config();
@@ -29,7 +30,8 @@ private:
     void mqtt5_init();
     void start_listener();
     void spawn_io_threads();
-private:
+
+  private:
     int _argc;
     char** _argv;
     po::variables_map _vm;
@@ -39,4 +41,4 @@ private:
     std::unique_ptr<net::signal_set> _signals;
 };
 
-#endif //SL_SERVICE_APP_HPP
+#endif // SL_SERVICE_APP_HPP

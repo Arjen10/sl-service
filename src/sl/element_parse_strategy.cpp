@@ -4,12 +4,12 @@
 
 #include "element_parse_strategy.hpp"
 
-strategy_factory &strategy_factory::instance() {
+strategy_factory& strategy_factory::instance() {
     static strategy_factory factory;
     return factory;
 }
 
-void strategy_factory::register_strategy(char c, strategy_factory::create_func &&creator) {
+void strategy_factory::register_strategy(char c, strategy_factory::create_func&& creator) {
     registry[c] = creator;
 }
 

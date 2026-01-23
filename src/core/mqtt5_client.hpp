@@ -15,26 +15,22 @@
 #include "singleton_template.hpp"
 #include "server_init.hpp"
 
-using mqtt_client_type = boost::mqtt5::mqtt_client<
-        boost::asio::ip::tcp::socket,
-        std::monostate,
-        boost::mqtt5::logger
->;
+using mqtt_client_type = boost::mqtt5::mqtt_client<boost::asio::ip::tcp::socket, std::monostate, boost::mqtt5::logger>;
 
-class mqtt5_client :public singleton_template<mqtt5_client> {
-private:
+class mqtt5_client : public singleton_template<mqtt5_client> {
+  private:
     // 重连定时器
     std::shared_ptr<boost::asio::steady_timer> _reconnect_timer;
     // 是否是连接状态
     std::atomic<bool> _is_connected{false};
     std::shared_ptr<mqtt_client_type> _client;
     friend class singleton_template<mqtt5_client>;
-public:
 
+  public:
     /**
      * 初始化
      */
-    void init(boost::asio::io_context &ioc);
+    void init(boost::asio::io_context& ioc);
 
     /**
      * 异步发布消息
@@ -42,8 +38,7 @@ public:
      * @param stcd 测站编码
      * @param message 消息
      */
-    void publish_async(const std::string &stcd, const std::string &message);
-
+    void publish_async(const std::string& stcd, const std::string& message);
 };
 
-#endif //SL_SERVICE_MQTT5_CLIENT_HPP
+#endif // SL_SERVICE_MQTT5_CLIENT_HPP

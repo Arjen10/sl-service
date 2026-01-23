@@ -24,12 +24,10 @@ work_state::work_state(short waring_status) {
     oth_warm = z || q || wq || qd || wp || zp || h || t || sv || rwv;
 }
 
-hyd::ri::obwt_w::obwt_w(std::string stcd)
-        : _stcd(std::move(stcd)) {
-
+hyd::ri::obwt_w::obwt_w(std::string stcd) : _stcd(std::move(stcd)) {
 }
 
-void hyd::ri::to_json(nlohmann::json &j, const obwt_w &obwt) {
+void hyd::ri::to_json(nlohmann::json& j, const obwt_w& obwt) {
     j = nlohmann::json::object();
     JSON_FIELD_REF(j, obwt, _stcd);
     JSON_FIELD_REF(j, obwt, _tm);
@@ -38,12 +36,10 @@ void hyd::ri::to_json(nlohmann::json &j, const obwt_w &obwt) {
     JSON_FIELD_REF(j, obwt, _wtmprcd);
 }
 
-hyd::ri::wqamd_w::wqamd_w(std::string stcd)
-        : _stcd(std::move(stcd)) {
-
+hyd::ri::wqamd_w::wqamd_w(std::string stcd) : _stcd(std::move(stcd)) {
 }
 
-void hyd::ri::to_json(nlohmann::json &j, const wqamd_w &awqmd) {
+void hyd::ri::to_json(nlohmann::json& j, const wqamd_w& awqmd) {
     j = nlohmann::json::object();
     JSON_FIELD_REF(j, awqmd, _stcd);
     JSON_FIELD_REF(j, awqmd, _spt);

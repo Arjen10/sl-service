@@ -13,11 +13,9 @@ namespace asio = boost::asio;
 /**
  * 完整的一个包，分为头部、正文、结束部分
  */
-class sl_full_buf
-{
+class sl_full_buf {
 
-public:
-
+  public:
     sl_full_buf();
 
     ~sl_full_buf() = default;
@@ -50,8 +48,7 @@ public:
      */
     void reset();
 
-private:
-
+  private:
     std::unique_ptr<asio::streambuf> _header;
 
     std::unique_ptr<asio::streambuf> _content;
@@ -61,14 +58,12 @@ private:
     /**
      * 写入字节
      */
-    void write(const int8_t* data, size_t size, std::unique_ptr<asio::streambuf> &buf);
+    void write(const int8_t* data, size_t size, std::unique_ptr<asio::streambuf>& buf);
 
     /**
      * 写入字节
      */
-    void write(int8_t byte, std::unique_ptr<asio::streambuf> &buf);
-
+    void write(int8_t byte, std::unique_ptr<asio::streambuf>& buf);
 };
 
-
-#endif //SL_FULL_BUF_HPP
+#endif // SL_FULL_BUF_HPP

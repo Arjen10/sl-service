@@ -14,7 +14,7 @@
 
 class base_table {
 
-public:
+  public:
     /**
      * 时间戳
      */
@@ -24,13 +24,11 @@ public:
      * 备注
      */
     std::string nt;
-
 };
 
 class wr_mp_q_r {
 
-public:
-
+  public:
     explicit wr_mp_q_r() = default;
 
     /**
@@ -62,12 +60,11 @@ public:
      * 时间
      */
     std::tm tm;
-
 };
 
 class wr_rtu_mon_r : public base_table {
 
-public:
+  public:
     /**
      * RTU 代码
      */
@@ -122,13 +119,11 @@ public:
      * 其他报警
      */
     bool oth_warm;
-
 };
 
 class work_state : public wr_rtu_mon_r {
 
-public:
-
+  public:
     work_state(short waring_status);
 
     /**
@@ -180,7 +175,6 @@ public:
      * 剩余水量报警
      */
     bool rwv;
-
 };
 
 /**
@@ -188,191 +182,188 @@ public:
  */
 namespace hyd {
 
-    namespace ri {
-        /**
-         * 水温表，32 页
-         */
-        class obwt_w {
+namespace ri {
+/**
+ * 水温表，32 页
+ */
+class obwt_w {
 
-        public:
+  public:
+    /**
+     * 构造这个对象，必须要一个站码
+     * @param stcd
+     */
+    explicit obwt_w(std::string stcd);
 
-            /**
-             * 构造这个对象，必须要一个站码
-             * @param stcd
-             */
-            explicit obwt_w(std::string stcd);
+    /**
+     * 测站编码
+     */
+    std::string _stcd;
 
-            /**
-             * 测站编码
-             */
-            std::string _stcd;
+    /**
+     * 时间
+     */
+    boost::posix_time::ptime _tm;
 
-            /**
-             * 时间
-             */
-            boost::posix_time::ptime _tm;
+    /**
+     * 测点相对位置，测点深和水深的比值
+     * 交给业务端进行计算
+     */
+    std::optional<std::string> _mprp;
 
-            /**
-             * 测点相对位置，测点深和水深的比值
-             * 交给业务端进行计算
-             */
-            std::optional<std::string> _mprp;
+    /**
+     * 水温
+     */
+    std::optional<double> _wtmp;
 
-            /**
-             * 水温
-             */
-            std::optional<double> _wtmp;
+    /**
+     * 水温注解码，由水温观测物符号和可靠性符号组成
+     */
+    std::optional<std::string> _wtmprcd;
 
-            /**
-             * 水温注解码，由水温观测物符号和可靠性符号组成
-             */
-            std::optional<std::string> _wtmprcd;
+  public:
+    friend void to_json(nlohmann::json& j, const obwt_w& awqmd);
+};
 
-        public:
-            friend void to_json(nlohmann::json &j, const obwt_w &awqmd);
+/**
+ * 水质自动监测数据，SLT 324-2019 44 页
+ */
+class wqamd_w : public base_extended {
 
-        };
+  public:
+    /**
+     * 构造这个对象，必须要一个站码
+     * @param stcd
+     */
+    explicit wqamd_w(std::string stcd);
 
-        /**
-         * 水质自动监测数据，SLT 324-2019 44 页
-         */
-        class wqamd_w : public base_extended {
+    std::string _stcd;
 
-        public:
+    /**
+     * 采样时间
+     */
+    boost::posix_time::ptime _spt;
 
-            /**
-             * 构造这个对象，必须要一个站码
-             * @param stcd
-             */
-            explicit wqamd_w(std::string stcd);
+    /**
+     * pH值
+     */
+    std::optional<double> _ph;
 
-            std::string _stcd;
+    /**
+     * 电导率
+     */
+    std::optional<double> _cond;
 
-            /**
-             * 采样时间
-             */
-            boost::posix_time::ptime _spt;
+    /**
+     * 浑浊度
+     */
+    std::optional<double> _turb;
 
-            /**
-             * pH值
-             */
-            std::optional<double> _ph;
+    /**
+     * 溶解氧
+     */
+    std::optional<double> _dox;
 
-            /**
-             * 电导率
-             */
-            std::optional<double> _cond;
+    /**
+     * 高锰酸盐指数
+     */
+    std::optional<double> _codmn;
 
-            /**
-             * 浑浊度
-             */
-            std::optional<double> _turb;
+    /**
+     * 化学需氧量
+     */
+    std::optional<double> _codcr;
 
-            /**
-             * 溶解氧
-             */
-            std::optional<double> _dox;
+    /**
+     * 总氮
+     */
+    std::optional<double> _tn;
 
-            /**
-             * 高锰酸盐指数
-             */
-            std::optional<double> _codmn;
+    /**
+     * 氨氮
+     */
+    std::optional<double> _nh3n;
 
-            /**
-             * 化学需氧量
-             */
-            std::optional<double> _codcr;
+    /**
+     * 亚硝酸盐氮
+     */
+    std::optional<double> _no2;
 
-            /**
-             * 总氮
-             */
-            std::optional<double> _tn;
+    /**
+     * 硝酸盐氮
+     */
+    std::optional<double> _no3;
 
-            /**
-             * 氨氮
-             */
-            std::optional<double> _nh3n;
+    /**
+     * 总磷
+     */
+    std::optional<double> _tp;
 
-            /**
-             * 亚硝酸盐氮
-             */
-            std::optional<double> _no2;
+    /**
+     * 总有机碳
+     */
+    std::optional<double> _toc;
 
-            /**
-             * 硝酸盐氮
-             */
-            std::optional<double> _no3;
+    /**
+     * 挥发酚
+     */
+    std::optional<double> _vlph;
 
-            /**
-             * 总磷
-             */
-            std::optional<double> _tp;
+    /**
+     * 叶绿素a
+     */
+    std::optional<double> _chla;
 
-            /**
-             * 总有机碳
-             */
-            std::optional<double> _toc;
+    /**
+     * 氟化物
+     */
+    std::optional<double> _f;
 
-            /**
-             * 挥发酚
-             */
-            std::optional<double> _vlph;
+    /**
+     * 砷
+     */
+    std::optional<double> _ars;
 
-            /**
-             * 叶绿素a
-             */
-            std::optional<double> _chla;
+    /**
+     * 汞
+     */
+    std::optional<double> _hg;
 
-            /**
-             * 氟化物
-             */
-            std::optional<double> _f;
+    /**
+     * 六价铬
+     */
+    std::optional<double> _cr6;
 
-            /**
-             * 砷
-             */
-            std::optional<double> _ars;
+    /**
+     * 铜
+     */
+    std::optional<double> _cu;
 
-            /**
-             * 汞
-             */
-            std::optional<double> _hg;
+    /**
+     * 铅
+     */
+    std::optional<double> _pb;
 
-            /**
-             * 六价铬
-             */
-            std::optional<double> _cr6;
+    /**
+     * 镉
+     */
+    std::optional<double> _cd;
 
-            /**
-             * 铜
-             */
-            std::optional<double> _cu;
+    /**
+     * 锌
+     */
+    std::optional<double> _zn;
 
-            /**
-             * 铅
-             */
-            std::optional<double> _pb;
+    /**
+     * 锑
+     */
+    std::optional<double> _sb;
 
-            /**
-             * 镉
-             */
-            std::optional<double> _cd;
+  public:
+    friend void to_json(nlohmann::json& j, const wqamd_w& awqmd);
+};
+} // namespace ri
 
-            /**
-             * 锌
-             */
-            std::optional<double> _zn;
+} // namespace hyd
 
-            /**
-             * 锑
-             */
-            std::optional<double> _sb;
-
-        public:
-            friend void to_json(nlohmann::json &j, const wqamd_w &awqmd);
-        };
-    }
-
-}
-
-#endif //SZY302_2017_HPP
+#endif // SZY302_2017_HPP

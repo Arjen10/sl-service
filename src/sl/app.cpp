@@ -11,8 +11,7 @@
 #include "app.hpp"
 #include "../core/mqtt5_client.hpp"
 
-app::app(int argc, char *argv[])
-        : _argc(argc), _argv(argv) {
+app::app(int argc, char* argv[]) : _argc(argc), _argv(argv) {
     this->_ioc = nullptr;
 }
 
@@ -20,7 +19,7 @@ app::~app() {
     if (this->_ioc) {
         this->_ioc->stop();
     }
-    for (auto &t: _threads) {
+    for (auto& t : _threads) {
         if (t.joinable()) {
             t.join();
         }
@@ -30,9 +29,7 @@ app::~app() {
 int app::run() {
     this->argc_to_vm();
     this->setup_logger();
-    LOG_INFO << "Boost version: "
-             << BOOST_VERSION / 100000 << "."
-             << BOOST_VERSION / 100 % 1000 << "."
+    LOG_INFO << "Boost version: " << BOOST_VERSION / 100000 << "." << BOOST_VERSION / 100 % 1000 << "."
              << BOOST_VERSION % 100;
     this->load_config();
     // ioc 必须在配置文件初始化完成后立即初始
@@ -51,12 +48,11 @@ void app::argc_to_vm() {
     po::options_description desc("参数说明");
     // 默认配置文件位置
     std::filesystem::path def_conf = std::filesystem::current_path() / "config.yaml";
-    desc.add_options()
-            ("config,c", po::value<std::string>()->default_value(def_conf.string()), "配置文件路径");
+    desc.add_options()("config,c", po::value<std::string>()->default_value(def_conf.string()), "配置文件路径");
     try {
         po::store(po::parse_command_line(this->_argc, this->_argv, desc), _vm);
         po::notify(_vm);
-    } catch (const po::error &e) {
+    } catch (const po::error& e) {
         std::cerr << "读取运行参数错误" << std::endl;
         std::exit(EXIT_FAILURE);
     }
@@ -72,30 +68,29 @@ void app::load_config() {
 }
 
 void app::ioc_init() {
-    auto &s_cfg = conf::sl::instance().get_server();
+    auto& s_cfg = conf::sl::instance().get_server();
     // 最少一个线程
     auto thread_num = std::max<int>(1, s_cfg.get_thread().asio_ioc());
     this->_ioc = std::make_unique<net::io_context>(thread_num);
 }
 
 void app::mqtt5_init() {
-    auto &cfg_opt = conf::sl::instance().get_callback().get_mqtt_conf();
+    auto& cfg_opt = conf::sl::instance().get_callback().get_mqtt_conf();
     if (!cfg_opt.has_value()) {
         return;
     }
     try {
         mqtt5_client::instance().init(*this->_ioc);
-        auto &mqtt5_cfg = cfg_opt.value();
-    } catch (std::exception &e) {
+        auto& mqtt5_cfg = cfg_opt.value();
+    } catch (std::exception& e) {
         LOG_FATAL << "初始化 MQTT5 客户端失败！" << e.what();
         std::exit(EXIT_FAILURE);
     }
-
 }
 
 void app::start_listener() {
-    auto &s_cfg = conf::sl::instance().get_server();
-    const auto &ip = s_cfg.get_listen_ip();
+    auto& s_cfg = conf::sl::instance().get_server();
+    const auto& ip = s_cfg.get_listen_ip();
     auto const address = net::ip::make_address(ip);
     auto port = s_cfg.get_port();
     _listener = std::make_shared<sl_listener>(*this->_ioc, tcp::endpoint{address, port});
@@ -103,14 +98,11 @@ void app::start_listener() {
     LOG_INFO << "开始监听 ip: " << ip << " prot: " << port;
     // 停止信号
     this->_signals = std::make_unique<net::signal_set>(*this->_ioc, SIGINT, SIGTERM);
-    this->_signals->async_wait(
-            [&](beast::error_code const &, int) {
-                this->_ioc->stop();
-            });
+    this->_signals->async_wait([&](beast::error_code const&, int) { this->_ioc->stop(); });
 }
 
 void app::spawn_io_threads() {
-    auto &s_cfg = conf::sl::instance().get_server();
+    auto& s_cfg = conf::sl::instance().get_server();
     auto asio_ioc = s_cfg.get_thread().asio_ioc();
     LOG_INFO << "asio ioc 线程数量 " << asio_ioc;
     // 线程数量排除掉主线程

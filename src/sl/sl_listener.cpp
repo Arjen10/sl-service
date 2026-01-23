@@ -6,35 +6,35 @@
 
 #include "../core/log.hpp"
 
-sl_listener::sl_listener(net::io_context &ioc, const tcp::endpoint& endpoint)
-        : ioc_(ioc), acceptor_(net::make_strand(ioc)) {
+sl_listener::sl_listener(net::io_context& ioc, const tcp::endpoint& endpoint)
+    : ioc_(ioc), acceptor_(net::make_strand(ioc)) {
     beast::error_code ec;
 
     // Open the acceptor
     acceptor_.open(endpoint.protocol(), ec);
     if (ec) {
-        LOG_ERROR <<  ec.message() << " open";
+        LOG_ERROR << ec.message() << " open";
         return;
     }
 
     // Allow address reuse
     acceptor_.set_option(net::socket_base::reuse_address(true), ec);
     if (ec) {
-        LOG_ERROR <<  ec.message() << " set_option";
+        LOG_ERROR << ec.message() << " set_option";
         return;
     }
 
     // Bind to the server address
     acceptor_.bind(endpoint, ec);
     if (ec) {
-        LOG_ERROR <<  ec.message() << " bind";
+        LOG_ERROR << ec.message() << " bind";
         return;
     }
 
     // Start listening for connections
     acceptor_.listen(net::socket_base::max_listen_connections, ec);
     if (ec) {
-        LOG_ERROR <<  ec.message() << " listen";
+        LOG_ERROR << ec.message() << " listen";
         return;
     }
 }
@@ -57,7 +57,7 @@ void sl_listener::on_accept(beast::error_code ec, tcp::socket socket) {
         // 创建一个水利会话，并运行
         auto session_ptr = std::make_shared<sl_session>(std::move(socket), this->ioc_);
         session_ptr->run();
-        //sl_session_map::instance().thread_safe_insert(session_ptr);
+        // sl_session_map::instance().thread_safe_insert(session_ptr);
     }
 
     // 接受其它的链接

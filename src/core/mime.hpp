@@ -7,4 +7,4 @@
 
 #define APPLICATION_JSON "application/json"
 
-#endif //SL_SERVICE_MIME_HPP
+#endif // SL_SERVICE_MIME_HPP

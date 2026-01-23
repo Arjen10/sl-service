@@ -2,11 +2,11 @@
 //// Created by Arjen on 2025/1/21.
 ////
 //
-//#include "parse_strategy.hpp"
+// #include "parse_strategy.hpp"
 //
 //// ----------------------------------------------------afn_parse--------------------------------------------------
 //
-//void parse_qr(byte_buf_reader &reader_helper, double &value, bool is_q = true)
+// void parse_qr(byte_buf_reader &reader_helper, double &value, bool is_q = true)
 //{
 //    double temp = 0;
 //    int high_four_bits;
@@ -55,7 +55,7 @@
 //                      : (temp * 0.001 / 3600) * symbol;
 //}
 //
-//void slt427_2021_parse_strategy::mp_q_r::operator()(slt427_2021::header *h,
+// void slt427_2021_parse_strategy::mp_q_r::operator()(slt427_2021::header *h,
 //                                                    slt427_2021::content *c,
 //                                                    slt427_2021::end *e,
 //                                                    byte_buf_reader &reader_helper)

@@ -2,7 +2,6 @@
 // Created by Arjen on 2025/3/2.
 //
 
-
 #ifndef SL_REQ_DECODER_HPP
 #define SL_REQ_DECODER_HPP
 
@@ -16,24 +15,21 @@
 #include "basic_decoder.hpp"
 #include "protocol/protocol_factory.hpp"
 
-namespace beast = boost::beast;                 // from <boost/beast.hpp>
+namespace beast = boost::beast; // from <boost/beast.hpp>
 
-class sl_req_decoder
-{
+class sl_req_decoder {
 
-private:
-
+  private:
     decode_state state_;
 
     std::shared_ptr<sl_basic_decoder> protocol_define_;
 
     sl_full_buf _full_buf;
 
-public:
-
+  public:
     explicit sl_req_decoder();
 
-    std::size_t put(boost::asio::const_buffer buffer, boost::system::error_code &ec);
+    std::size_t put(boost::asio::const_buffer buffer, boost::system::error_code& ec);
 
     sl_full_buf release();
 
@@ -42,8 +38,6 @@ public:
     bool is_done() const;
 
     std::shared_ptr<sl_basic_decoder> protocol_define();
-
 };
 
-
-#endif //SL_REQ_DECODER_HPP
+#endif // SL_REQ_DECODER_HPP

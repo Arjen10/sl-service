@@ -2,26 +2,26 @@
 //// Created by Arjen on 2024/12/22.
 ////
 //
-//#ifndef SLT427_2021_HPP
-//#define SLT427_2021_HPP
+// #ifndef SLT427_2021_HPP
+// #define SLT427_2021_HPP
 //
-//#include <boost/algorithm/hex.hpp>
-//#include <boost/log/trivial.hpp>
-//#include <boost/crc.hpp>
-//#include <boost/date_time.hpp>
-//#include <iostream>
+// #include <boost/algorithm/hex.hpp>
+// #include <boost/log/trivial.hpp>
+// #include <boost/crc.hpp>
+// #include <boost/date_time.hpp>
+// #include <iostream>
 //
-//#include "../../basic_decoder.hpp"
-//#include "../../../byte_helper.hpp"
-//#include "parse_strategy.hpp"
-//#include "../../../gb/szy302_2017.hpp"
-//#include "../../protocol_define.hpp"
+// #include "../../basic_decoder.hpp"
+// #include "../../../byte_helper.hpp"
+// #include "parse_strategy.hpp"
+// #include "../../../gb/szy302_2017.hpp"
+// #include "../../protocol_define.hpp"
 //
-//class wr_mp_q_r;
+// class wr_mp_q_r;
 //
-//class work_state;
+// class work_state;
 //
-//namespace slt427_2021 {
+// namespace slt427_2021 {
 //
 //    /**
 //    * 时间标识符，长度7个字节
@@ -293,4 +293,4 @@
 //
 //}
 //
-//#endif //SLT427_2021_HPP
+// #endif //SLT427_2021_HPP

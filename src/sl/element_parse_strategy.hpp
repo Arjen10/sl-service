@@ -21,22 +21,19 @@ class element_parse_strategy_base;
  */
 class element_parse_strategy_base {
 
-public:
-
+  public:
     /**
      * 开始执行解析
      * @param data 字节指针
      * @param p_size 指针大小
      */
-    virtual void parse(void *h, void *c, void *e, byte_buf_reader &reader_helper) = 0;
-
+    virtual void parse(void* h, void* c, void* e, byte_buf_reader& reader_helper) = 0;
 };
 
-template<typename Header, typename Content, typename End>
+template <typename Header, typename Content, typename End>
 class element_parse_strategy : public element_parse_strategy_base {
 
-public:
-
+  public:
     /**
      * 模版类执行类型转换，子类只需要关注仿函数即可
      * @param h
@@ -44,29 +41,27 @@ public:
      * @param e
      * @param reader_helper
      */
-    void parse(void *h, void *c, void *e, byte_buf_reader &reader_helper) override {
-        this->operator()(reinterpret_cast<Header *>(h), reinterpret_cast<Content *>(c), reinterpret_cast<End *>(e),
+    void parse(void* h, void* c, void* e, byte_buf_reader& reader_helper) override {
+        this->operator()(reinterpret_cast<Header*>(h), reinterpret_cast<Content*>(c), reinterpret_cast<End*>(e),
                          reader_helper);
     }
 
-private:
-
-    virtual void operator()(Header *h, Content *c, End *e, byte_buf_reader &reader_helper) = 0;
-
+  private:
+    virtual void operator()(Header* h, Content* c, End* e, byte_buf_reader& reader_helper) = 0;
 };
 
 class strategy_factory {
-public:
+  public:
     using create_func = std::function<std::shared_ptr<element_parse_strategy_base>()>;
 
-    static strategy_factory &instance();
+    static strategy_factory& instance();
 
-    void register_strategy(char c, create_func &&creator);
+    void register_strategy(char c, create_func&& creator);
 
     std::shared_ptr<element_parse_strategy_base> get_strategy(char c);
 
-private:
+  private:
     std::unordered_map<char, create_func> registry;
 };
 
-#endif //ELEMENT_PARSE_STRATEGY_HPP
+#endif // ELEMENT_PARSE_STRATEGY_HPP
