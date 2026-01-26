@@ -29,7 +29,7 @@ app::~app() {
 int app::run() {
     this->argc_to_vm();
     this->setup_logger();
-    LOG_INFO << "Boost version: " << BOOST_VERSION / 100000 << "." << BOOST_VERSION / 100 % 1000 << "."
+    LOG_INFO << "Boost Version: " << BOOST_VERSION / 100000 << "." << BOOST_VERSION / 100 % 1000 << "."
              << BOOST_VERSION % 100;
     this->load_config();
     // ioc 必须在配置文件初始化完成后立即初始

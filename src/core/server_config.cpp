@@ -14,7 +14,7 @@ void server::init(const YAML::Node& node) {
     // https://stackoverflow.com/a/25518538 docker 环境检查
     this->_listen_ip = node["listen-ip"].as<std::string>("127.0.0.1");
     bool in_docker = fs::exists("/.dockerenv") || fs::exists("/proc/1/cgroup");
-    if (!in_docker && this->_listen_ip == "127.0.0.1") {
+    if (in_docker && this->_listen_ip == "127.0.0.1") {
         LOG_WARN << "检测到容器运行环境，当前监听地址为 127.0.0.1。"
                     "在多容器场景下，该配置可能导致服务无法被其他容器访问。"
                     "如需对外或跨容器访问，建议使用 0.0.0.0。";
