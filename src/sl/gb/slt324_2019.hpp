@@ -228,7 +228,7 @@ namespace hyd {
         /**
          * 水质自动监测数据，SLT 324-2019 44 页
          */
-        class wqamd_w : public base_extended {
+        class wqamd_w {
 
           public:
             /**
