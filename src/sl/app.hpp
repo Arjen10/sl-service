@@ -29,6 +29,7 @@ class app {
     void ioc_init();
     void mqtt5_init();
     void start_listener();
+    void start_sys_threads_pool();
     void spawn_io_threads();
 
   private:

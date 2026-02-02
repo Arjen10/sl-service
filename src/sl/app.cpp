@@ -10,6 +10,7 @@
 
 #include "app.hpp"
 #include "../core/mqtt5_client.hpp"
+#include "../core/sys_thread_pool.hpp"
 
 app::app(int argc, char* argv[]) : _argc(argc), _argv(argv) {
     this->_ioc = nullptr;
@@ -36,6 +37,7 @@ int app::run() {
     this->ioc_init();
     this->start_listener();
     this->mqtt5_init();
+    this->start_sys_threads_pool();
     // 先启动子线程
     spawn_io_threads();
     // 主线程也 run
@@ -101,13 +103,20 @@ void app::start_listener() {
     this->_signals->async_wait([&](beast::error_code const&, int) { this->_ioc->stop(); });
 }
 
+void app::start_sys_threads_pool() {
+    auto& s_cfg = conf::sl::instance().get_server();
+    auto sys_threads = s_cfg.get_thread().pool();
+    sys_thread_pool::instance().init(sys_threads);
+    LOG_INFO << "初始化业务线程池成功，线程数量 " << sys_threads;
+}
+
 void app::spawn_io_threads() {
     auto& s_cfg = conf::sl::instance().get_server();
     auto asio_ioc = s_cfg.get_thread().asio_ioc();
-    LOG_INFO << "asio ioc 线程数量 " << asio_ioc;
     // 线程数量排除掉主线程
     _threads.reserve(asio_ioc - 1);
     for (std::size_t i = 0; i < asio_ioc - 1; ++i) {
         _threads.emplace_back([this] { _ioc->run(); });
     }
+    LOG_INFO << "初始化 asio ioc 成功，线程数量 " << asio_ioc;
 }

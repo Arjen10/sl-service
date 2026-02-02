@@ -26,6 +26,7 @@ target_include_directories(
 )
 
 if (MSVC)
+    add_compile_definitions(_WIN32_WINNT=0x0A00)
     target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_USE_WINAPI_VERSION=0x0602)
     target_compile_options(${PROJECT_NAME} PRIVATE /utf-8 /bigobj)
 endif()

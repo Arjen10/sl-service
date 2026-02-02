@@ -17,7 +17,6 @@
 #include <memory>
 
 #include "sl_req_decoder.hpp"
-#include "../core/boost_thread_pool.hpp"
 #include "../core/server_init.hpp"
 
 namespace http = beast::http;

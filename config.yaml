@@ -4,15 +4,15 @@ server:
   # 监听端口，默认 4399
   port: 4399
   session:
-    # 最大缓冲区大小，默认 2048
+    # 最大缓冲区大小，默认 2048 字节
     max-buffer: 2048
     # 读取超时时间，单位秒，默认 900
     reader-idle-time-out: 900
   thread:
     # asio线程数量，默认 2
     asio-ioc: 2
-    # 业务线程池数量，默认 2
-    pool: 2
+    # 业务线程池数量，默认 4
+    pool: 4
   log:
     # debug info warning error fatal
     # 如果在上方日志等级中没有出现，默认 info

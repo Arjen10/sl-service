@@ -4,6 +4,8 @@
 
 #include "sl_session.hpp"
 
+#include "../core/sys_thread_pool.hpp"
+
 bool parser_is_done::operator()(const sl_req_decoder& p) const {
     return p.is_done();
 }
@@ -149,12 +151,12 @@ void sl_session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
     }
     // fixme 这里如果什么都不传，会有报错
     boost::ignore_unused(bytes_transferred);
-    auto& tp = thread_pool();
+    auto& tp = sys_thread_pool::instance().thread_pool();
     auto self = shared_from_this();
     // 此对象交给 asio 获取，证明已经切包完成
     sl_full_buf full_buf = self->codec_->release();
     // 将解析逻辑和 io 线程分离开
-    net::post(tp, [self, fb = std::move(full_buf)] {
+    net::post(*tp, [self, fb = std::move(full_buf)] {
         try {
             auto buffer = self->codec_->protocol_define()->parse_template(fb);
             // 处理完成后交给 asio 回调

@@ -62,7 +62,7 @@ void thread::init(const YAML::Node& node) {
     auto asio_ioc_v = node["asio-ioc"].as<std::uint16_t>(1);
     this->_asio_ioc = std::max(asio_ioc_v, std::uint16_t{1});
     auto pool_v = node["pool"].as<std::uint16_t>(1);
-    this->_pool = std::max(pool_v, std::uint16_t{1});
+    this->_pool = std::max(pool_v, static_cast<std::uint16_t>(1));
 }
 
 std::uint16_t thread::asio_ioc() const {
