@@ -25,6 +25,12 @@ target_include_directories(
         ${Boost_INCLUDE_DIRS}
 )
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
+else()
+    add_definitions(-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO)
+endif()
+
 if (MSVC)
     add_compile_definitions(_WIN32_WINNT=0x0A00)
     target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_USE_WINAPI_VERSION=0x0602)

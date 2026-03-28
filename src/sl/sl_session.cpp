@@ -163,8 +163,8 @@ void sl_session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
             auto buffer = self->codec_->protocol_define()->parse_template(fb);
             // 处理完成后交给 asio 回调
             self->do_write(std::move(buffer));
-        } catch (std::exception& e) {
-            SPDLOG_ERROR(e.what());
+        } catch (const std::exception& e) {
+            SPDLOG_ERROR("解析异常: {}", e.what());
             // 写出失败就关闭吧
             std::ostringstream message;
             message << "出现异常关闭，原因 " << e.what();

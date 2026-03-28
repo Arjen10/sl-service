@@ -14,9 +14,9 @@ server:
     # 业务线程池数量，默认 4
     pool: 4
   log:
-    # debug info warning error fatal
+    # trace debug info warning error fatal
     # 如果在上方日志等级中没有出现，默认 info
-    level: info
+    level: trace
 
 callback:
   # 是否启用回调，默认不启用，true 或者 false
