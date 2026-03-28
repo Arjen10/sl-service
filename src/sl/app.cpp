@@ -30,7 +30,7 @@ app::~app() {
 int app::run() {
     this->argc_to_vm();
     this->setup_logger();
-    spdlog::info("Boost Version: {}.{}.{}", BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
+    SPDLOG_INFO("Boost Version: {}.{}.{}", BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
     this->load_config();
     // ioc 必须在配置文件初始化完成后立即初始
     this->ioc_init();
@@ -54,7 +54,7 @@ void app::argc_to_vm() {
         po::store(po::parse_command_line(this->_argc, this->_argv, desc), _vm);
         po::notify(_vm);
     } catch (const po::error& e) {
-        std::cerr << "读取运行参数错误" << std::endl;
+        SPDLOG_CRITICAL("读取运行参数错误 {}", e.what());
         std::exit(EXIT_FAILURE);
     }
 }
@@ -62,7 +62,7 @@ void app::argc_to_vm() {
 void app::setup_logger() {
     auto log_level = logger::init(this->_vm);
     auto level = spdlog::get_level();
-    spdlog::info("当前日志等级: {}", spdlog::level::to_string_view(level));
+    SPDLOG_INFO("当前日志等级: {}", spdlog::level::to_string_view(level));
 }
 
 void app::load_config() {
@@ -85,7 +85,7 @@ void app::mqtt5_init() {
         mqtt5_client::instance().init(*this->_ioc);
         auto& mqtt5_cfg = cfg_opt.value();
     } catch (std::exception& e) {
-        spdlog::critical("初始化 MQTT5 客户端失败！{}", e.what());
+        SPDLOG_CRITICAL("初始化 MQTT5 客户端失败！{}", e.what());
         std::exit(EXIT_FAILURE);
     }
 }
@@ -97,7 +97,7 @@ void app::start_listener() {
     auto port = s_cfg.get_port();
     _listener = std::make_shared<sl_listener>(*this->_ioc, tcp::endpoint{address, port});
     this->_listener->run();
-    spdlog::info("开始监听 ip: {} prot: {}", ip, port);
+    SPDLOG_INFO("开始监听 ip: {} prot: {}", ip, port);
     // 停止信号
     this->_signals = std::make_unique<net::signal_set>(*this->_ioc, SIGINT, SIGTERM);
     this->_signals->async_wait([&](beast::error_code const&, int) { this->_ioc->stop(); });
@@ -107,7 +107,7 @@ void app::start_sys_threads_pool() {
     auto& s_cfg = conf::sl::instance().get_server();
     auto sys_threads = s_cfg.get_thread().pool();
     sys_thread_pool::instance().init(sys_threads);
-    spdlog::info("初始化业务线程池成功，线程数量 {}", sys_threads);
+    SPDLOG_INFO("初始化业务线程池成功，线程数量 {}", sys_threads);
 }
 
 void app::spawn_io_threads() {
@@ -118,5 +118,5 @@ void app::spawn_io_threads() {
     for (std::size_t i = 0; i < asio_ioc - 1; ++i) {
         _threads.emplace_back([this] { _ioc->run(); });
     }
-    spdlog::info("初始化 asio ioc 成功，线程数量 {}", asio_ioc);
+    SPDLOG_INFO("初始化 asio ioc 成功，线程数量 {}", asio_ioc);
 }

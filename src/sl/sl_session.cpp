@@ -147,7 +147,7 @@ void sl_session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
         return;
     }
     if (ec) {
-        spdlog::error(ec.message());
+        SPDLOG_ERROR(ec.message());
         // todo 如果这里报错应该直接关闭？
         return;
     }
@@ -164,13 +164,13 @@ void sl_session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
             // 处理完成后交给 asio 回调
             self->do_write(std::move(buffer));
         } catch (std::exception& e) {
-            spdlog::error(e.what());
+            SPDLOG_ERROR(e.what());
             // 写出失败就关闭吧
             std::ostringstream message;
             message << "出现异常关闭，原因 " << e.what();
             self->close(message.str());
         } catch (...) {
-            spdlog::error("出现未知异常关闭");
+            SPDLOG_ERROR("出现未知异常关闭");
             self->close("出现未知异常关闭");
         }
     });
@@ -182,7 +182,7 @@ void sl_session::do_write(std::optional<std::shared_ptr<asio::streambuf>>&& buff
     auto& buf_ptr = *buffer;
     net::async_write(socket_, *buf_ptr, [self, buf_ptr](boost::system::error_code ec, std::size_t bytes_transferred) {
         if (ec) {
-            spdlog::error(" 写出失败！{}", ec.message());
+            SPDLOG_ERROR(" 写出失败！{}", ec.message());
         }
         // 即使失败，也继续读
         self->do_read();
@@ -201,7 +201,7 @@ void sl_session::close(const std::string& reason) {
     this->socket_.shutdown(tcp::socket::shutdown_both, ec);
     this->socket_.close(ec);
     this->_timer.cancel();
-    spdlog::debug("关闭连接 {}", reason);
+    SPDLOG_DEBUG("关闭连接 {}", reason);
 }
 
 void sl_session::start_timer() {

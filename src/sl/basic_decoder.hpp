@@ -163,7 +163,7 @@ class sl_decoder_crtp : public sl_basic_decoder {
         auto& m_opt = back_cfg.get_callback_method();
         auto it = callback::_map.find(m_opt.value());
         if (it == callback::_map.end()) {
-            spdlog::error("未找到对应的回调函数，请检查配置文件 callback.method 项目");
+            SPDLOG_ERROR("未找到对应的回调函数，请检查配置文件 callback.method 项目");
             return;
         }
         nlohmann::json h_json = h;

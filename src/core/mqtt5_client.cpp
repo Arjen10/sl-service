@@ -19,10 +19,10 @@ void mqtt5_client::init(boost::asio::io_context& ioc) {
     _client->async_run([this](boost::mqtt5::error_code ec) {
         if (!ec) {
             // 正常退出？一般不会发生，除非主动 stop
-            spdlog::info("MQTT client stopped gracefully.");
+            SPDLOG_INFO("MQTT client stopped gracefully.");
             return;
         }
-        spdlog::error("MQTT connection lost: {}", ec.message());
+        SPDLOG_ERROR("MQTT connection lost: {}", ec.message());
     });
 }
 
@@ -32,10 +32,10 @@ void mqtt5_client::publish_async(const std::string& stcd, const std::string& mes
     auto qos = cfg->get_qos();
     auto publish_callback = [this, topic, message](auto ec, auto&&...) {
         if (!ec) {
-            spdlog::trace("[MQTT publish OK] topic= {}", topic);
+            SPDLOG_DEBUG("[MQTT publish OK] topic= {}", topic);
             return;
         }
-        spdlog::error("[MQTT 发布失败] topic= {} message= {}  ec= {}", topic, message, ec.message());
+        SPDLOG_ERROR("[MQTT 发布失败] topic= {} message= {}  ec= {}", topic, message, ec.message());
     };
 
     // 根据运行时 QoS 值分发到对应的模板实例
@@ -56,7 +56,7 @@ void mqtt5_client::publish_async(const std::string& stcd, const std::string& mes
         break;
     default:
         // 按道理来说不会走到这里，打个日志提醒下
-        spdlog::warn("错误的 qos 配置 {} ，将不会给MQTT发送任何消息", static_cast<std::int32_t>(qos));
+        SPDLOG_WARN("错误的 qos 配置 {} ，将不会给MQTT发送任何消息", static_cast<std::int32_t>(qos));
         break;
     }
 }
