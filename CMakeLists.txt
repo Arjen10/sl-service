@@ -5,13 +5,13 @@ set(CMAKE_CXX_STANDARD 17)
 
 # 查询基线版本 https://github.com/microsoft/vcpkg/blob/48a0cef9ea67606c94f149647470c956bb78050a/versions/baseline.json
 find_package(Boost REQUIRED COMPONENTS
-        log log_setup thread filesystem
-        system date_time regex program_options
+        thread system date_time regex program_options
         mqtt5)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
 message(STATUS "Boost version: ${Boost_VERSION} , Boost library dirs: ${Boost_INCLUDE_DIRS}")
 
@@ -33,10 +33,7 @@ endif()
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
-        Boost::log
-        Boost::log_setup
         Boost::thread
-        Boost::filesystem
         Boost::system
         Boost::date_time
         Boost::regex
@@ -45,6 +42,7 @@ target_link_libraries(${PROJECT_NAME}
         nlohmann_json::nlohmann_json
         cpr::cpr
         yaml-cpp::yaml-cpp
+        spdlog::spdlog
 )
 
 add_custom_command(

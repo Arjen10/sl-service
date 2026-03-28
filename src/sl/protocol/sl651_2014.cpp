@@ -2,6 +2,8 @@
 // Created by Arjen on 2025/9/12.
 //
 
+#include <spdlog/spdlog.h>
+
 #include "sl651_2014.hpp"
 
 namespace sl651_2014::json {
@@ -214,7 +216,7 @@ namespace sl651_2014::codec {
         // 取高四位 上下行标识符 0000 上行 1000 下行
         h_ptr->_is_up = ((static_cast<uint16_t>(s) >> 12) & 0xF) == 0;
         if (h_ptr->_is_up) {
-            LOG_DEBUG << "这是一个上行数据";
+            spdlog::trace("这是一个上行数据");
         }
         h_ptr->_content_length = this->content_length(hb);
         std::stringstream ss;
@@ -248,14 +250,14 @@ namespace sl651_2014::codec {
         reader.read_tm(c_ptr->_report_tm, REPORT_TM_LEN);
         nlohmann::json temp_j;
         to_json(temp_j, c_ptr->_report_tm);
-        LOG_DEBUG << " 发报时间 " << temp_j.get<std::string>();
+        spdlog::trace("发报时间 {}", temp_j.get<std::string>());
         c_ptr->_raw_list.emplace_back(hex_reader, REPORT_TM_LEN, REPORT_TM_NOTE, temp_j);
         // 处理链路维持报，当可读的字节等于 0 的时候，就是设备发的心跳包
         if (reader.readable_bytes() == 0) {
             if (h_ptr->_function != model::req_type::KEEP_ALIVE) {
                 throw sl651_2014::error("错误的帧和功能码！");
             }
-            LOG_DEBUG << "设备心跳包";
+            spdlog::trace("设备心跳包");
             return nullptr;
         }
         // 测站编码引导符 2字节
@@ -314,9 +316,9 @@ namespace sl651_2014::codec {
                 c_ptr->_raw_list.emplace_back(hex_reader, 1, expand_note, true);
                 auto v_str = temp_opt ? std::to_string(temp_opt.value()) : "null";
                 c_ptr->_raw_list.emplace_back(hex_reader, data_len, expand_note + "  取值", v_str, true);
-                LOG_WARN << " 不支持的标识符 " << oss.str() << " 值 " << v_str;
+                spdlog::warn("不支持的标识符 {} 值 {}", oss.str(), v_str);
             } catch (std::exception& e) {
-                LOG_ERROR << e.what();
+                spdlog::error(e.what());
                 throw e;
             }
         }
@@ -522,7 +524,7 @@ namespace sl651_2014::parse {
                  content->_stcd.clear();
              }
              reader.read_hex_str(content->_stcd, 4);
-             LOG_DEBUG << " 水质站点 STCD " << content->_stcd;
+             spdlog::trace("水质站点 STCD  {}", content->_stcd);
              // 处理报文取值
              content->_raw_list.emplace_back(hex_reader, STCD_LEN, STCD_NOTE, content->_stcd);
          }},
@@ -536,7 +538,7 @@ namespace sl651_2014::parse {
              auto data_size = parse_data(reader, wtmp_opt);
              handle_v(content, hex_reader, data_size, model::data_type::c, wtmp_opt);
              if (wtmp_opt.has_value()) {
-                 LOG_DEBUG << " 瞬时水温 " << wtmp_opt.value();
+                 spdlog::trace("瞬时水温  {}", wtmp_opt.value());
              }
          }},
 
@@ -549,7 +551,7 @@ namespace sl651_2014::parse {
              auto data_len = parse_data(reader, v_opt);
              handle_v(content, hex_reader, data_len, model::data_type::vt, v_opt);
              if (v_opt.has_value()) {
-                 LOG_DEBUG << " 电压 " << v_opt.value();
+                 spdlog::trace("电压  {}", v_opt.value());
              }
          }},
 
@@ -562,7 +564,7 @@ namespace sl651_2014::parse {
              auto data_len = parse_data(reader, ph_opt);
              handle_v(content, hex_reader, data_len, model::data_type::ph, ph_opt);
              if (ph_opt.has_value()) {
-                 LOG_DEBUG << " ph值 " << ph_opt.value();
+                 spdlog::trace("ph值  {}", ph_opt.value());
              }
          }},
 
@@ -575,7 +577,7 @@ namespace sl651_2014::parse {
              auto data_len = parse_data(reader, dox_opt);
              handle_v(content, hex_reader, data_len, model::data_type::dox, dox_opt);
              if (dox_opt.has_value()) {
-                 LOG_DEBUG << " 溶解氧 " << dox_opt.value();
+                 spdlog::trace("溶解氧  {}", dox_opt.value());
              }
          }},
 
@@ -588,7 +590,7 @@ namespace sl651_2014::parse {
              auto data_len = parse_data(reader, cond_opt);
              handle_v(content, hex_reader, data_len, model::data_type::cond, cond_opt);
              if (cond_opt.has_value()) {
-                 LOG_DEBUG << " 电导率 " << cond_opt.value();
+                 spdlog::trace("电导率  {}", cond_opt.value());
              }
          }},
 
@@ -601,7 +603,7 @@ namespace sl651_2014::parse {
              auto data_len = parse_data(reader, turb_opt);
              handle_v(content, hex_reader, data_len, model::data_type::turb, turb_opt);
              if (turb_opt.has_value()) {
-                 LOG_DEBUG << " 浊度 " << turb_opt.value();
+                 spdlog::trace("浊度  {}", turb_opt.value());
              }
          }},
 
@@ -614,7 +616,7 @@ namespace sl651_2014::parse {
              auto data_len = parse_data(reader, codmn_opt);
              handle_v(content, hex_reader, data_len, model::data_type::codmn, codmn_opt);
              if (codmn_opt.has_value()) {
-                 LOG_DEBUG << " 高锰酸盐指数 " << codmn_opt.value();
+                 spdlog::trace("高锰酸盐指数  {}", codmn_opt.value());
              }
          }},
 
@@ -628,7 +630,7 @@ namespace sl651_2014::parse {
              auto data_len = parse_data(reader, nh3n_opt);
              handle_v(content, hex_reader, data_len, model::data_type::nh4n, nh3n_opt);
              if (nh3n_opt.has_value()) {
-                 LOG_DEBUG << " 氨氮 " << nh3n_opt.value();
+                 spdlog::trace("氨氮  {}", nh3n_opt.value());
              }
          }},
 
@@ -642,7 +644,7 @@ namespace sl651_2014::parse {
              auto data_len = parse_data(reader, tp_opt);
              handle_v(content, hex_reader, data_len, model::data_type::tp, tp_opt);
              if (tp_opt.has_value()) {
-                 LOG_DEBUG << " 总磷 " << tp_opt.value();
+                 spdlog::trace("总磷  {}", tp_opt.value());
              }
          }},
 
@@ -656,7 +658,7 @@ namespace sl651_2014::parse {
              auto data_len = parse_data(reader, tn_opt);
              handle_v(content, hex_reader, data_len, model::data_type::tn, tn_opt);
              if (tn_opt.has_value()) {
-                 LOG_DEBUG << " 总氮 " << tn_opt.value();
+                 spdlog::trace("总氮  {}", tn_opt.value());
              }
          }},
 
@@ -670,7 +672,7 @@ namespace sl651_2014::parse {
              auto data_len = parse_data(reader, tn_opt);
              handle_v(content, hex_reader, data_len, model::data_type::toc, tn_opt);
              if (tn_opt.has_value()) {
-                 LOG_DEBUG << " 有机总碳 " << tn_opt.value();
+                 spdlog::trace("有机总碳  {}", tn_opt.value());
              }
          }},
 
@@ -683,7 +685,7 @@ namespace sl651_2014::parse {
              auto data_len = parse_data(reader, tn_opt);
              handle_v(content, hex_reader, data_len, model::data_type::cu, tn_opt);
              if (tn_opt.has_value()) {
-                 LOG_DEBUG << " 铜 " << tn_opt.value();
+                 spdlog::trace("铜  {}", tn_opt.value());
              }
          }},
 
@@ -696,7 +698,7 @@ namespace sl651_2014::parse {
              auto data_len = parse_data(reader, zn_opt);
              handle_v(content, hex_reader, data_len, model::data_type::zn, zn_opt);
              if (zn_opt.has_value()) {
-                 LOG_DEBUG << " 锌 " << zn_opt.value();
+                 spdlog::trace("锌  {}", zn_opt.value());
              }
          }},
 
@@ -709,7 +711,7 @@ namespace sl651_2014::parse {
              auto data_len = parse_data(reader, pb_opt);
              handle_v(content, hex_reader, data_len, model::data_type::pb, pb_opt);
              if (pb_opt.has_value()) {
-                 LOG_DEBUG << " 铅 " << pb_opt.value();
+                 spdlog::trace("铅  {}", pb_opt.value());
              }
          }},
 
@@ -722,7 +724,7 @@ namespace sl651_2014::parse {
              auto data_len = parse_data(reader, chla_opt);
              handle_v(content, hex_reader, data_len, model::data_type::chla, chla_opt);
              if (chla_opt.has_value()) {
-                 LOG_DEBUG << " 叶绿素a " << chla_opt.value();
+                 spdlog::trace("叶绿素a  {}", chla_opt.value());
              }
          }},
 

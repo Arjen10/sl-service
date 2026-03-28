@@ -2,6 +2,8 @@
 // Created by Arjen on 2025/12/7.
 //
 
+#include <spdlog/spdlog.h>
+
 #include <filesystem>
 
 #include "../core/yaml_ser_deser.hpp"
@@ -15,9 +17,9 @@ void server::init(const YAML::Node& node) {
     this->_listen_ip = node["listen-ip"].as<std::string>("127.0.0.1");
     bool in_docker = fs::exists("/.dockerenv") || fs::exists("/proc/1/cgroup");
     if (in_docker && this->_listen_ip == "127.0.0.1") {
-        LOG_WARN << "检测到容器运行环境，当前监听地址为 127.0.0.1。"
-                    "在多容器场景下，该配置可能导致服务无法被其他容器访问。"
-                    "如需对外或跨容器访问，建议使用 0.0.0.0。";
+        spdlog::warn("检测到容器运行环境，当前监听地址为 127.0.0.1。"
+                     "在多容器场景下，该配置可能导致服务无法被其他容器访问。"
+                     "如需对外或跨容器访问，建议使用 0.0.0.0。");
     }
     this->_port = node["port"].as<uint16_t>(4399);
     this->_session.init(node["session"]);
@@ -75,7 +77,7 @@ std::uint16_t thread::pool() const {
 
 void call_back::init(const YAML::Node& node) {
     if (!node.IsDefined()) {
-        LOG_WARN << "回调没有配置";
+        spdlog::warn("回调没有配置");
         this->_enable = false;
         return;
     }
@@ -83,12 +85,12 @@ void call_back::init(const YAML::Node& node) {
     this->_enable = e_node.as<bool>(false);
     // 如果不开启，直接返回
     if (!_enable) {
-        LOG_INFO << "当前 callback 状态为：无需回调";
+        spdlog::warn("当前 callback 状态为：无需回调");
         return;
     }
     auto mn = node["method"];
     if (!mn.IsDefined()) {
-        LOG_FATAL << "开启了回调，但 callback.method 未配置！";
+        spdlog::critical("开启了回调，但 callback.method 未配置！");
         std::exit(EXIT_FAILURE);
     }
     switch (mn.as<method>()) {
@@ -98,7 +100,7 @@ void call_back::init(const YAML::Node& node) {
         auto& cfg = this->_http_conf.value();
         cfg.init(http_node);
         this->_method = method::http_callback;
-        LOG_INFO << "当前 callback 状态为：http 回调，api 接口地址：" << cfg._url;
+        spdlog::info("当前 callback 状态为：http 回调，api 接口地址：{}", cfg._url);
         return;
     }
     case method::mqtt_callback: {
@@ -107,12 +109,12 @@ void call_back::init(const YAML::Node& node) {
         auto& cfg = this->_mqtt.value();
         cfg.init(mqtt_node);
         this->_method = method::mqtt_callback;
-        LOG_INFO << "当前 callback 状态为：mqtt 回调，mqtt broker 地址：" << cfg._broker_host << " 端口："
-                 << cfg._broker_port;
+        spdlog::info("当前 callback 状态为：mqtt 回调，mqtt broker 地址：{} 端口：", cfg._broker_host,
+                     cfg._broker_port);
         return;
     }
     default: {
-        LOG_FATAL << "错误的 callback.method 配置 " << mn.as<std::string>();
+        spdlog::critical("错误的 callback.method 配置 {}", mn.as<std::string>());
         std::exit(EXIT_FAILURE);
     }
     }
@@ -167,7 +169,7 @@ void mqtt::init(const YAML::Node& node) {
     if (qos == 0 || qos == 1 || qos == 2) {
         this->_qos = static_cast<boost::mqtt5::qos_e>(qos);
     } else {
-        LOG_FATAL << "错误的 qos " << qos;
+        spdlog::critical("错误的 qos {}", qos);
         std::exit(EXIT_FAILURE);
     }
 }
@@ -202,18 +204,18 @@ const boost::mqtt5::qos_e& mqtt::get_qos() const {
 
 void boost_log::init(const YAML::Node& node) {
     if (node.IsNull()) {
-        this->_level = boost::log::trivial::info;
+        this->_level = spdlog::level::info;
         return;
     }
     auto ln = node["level"];
     if (!ln.IsDefined()) {
         // 默认 info 就好
-        this->_level = boost::log::trivial::info;
+        this->_level = spdlog::level::info;
         return;
     }
-    this->_level = ln.as<boost::log::trivial::severity_level>();
+    this->_level = ln.as<spdlog::level::level_enum>();
 }
 
-boost::log::trivial::severity_level boost_log::level() {
+spdlog::level::level_enum boost_log::level() {
     return this->_level;
 }

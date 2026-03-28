@@ -6,10 +6,9 @@
 #define SL_SERVICE_SERVER_CONFIG_HPP
 
 #include <boost/mqtt5/types.hpp>
-#include <boost/log/trivial.hpp>
+#include <spdlog/common.h>
 #include <yaml-cpp/yaml.h>
 
-#include "log.hpp"
 #include "callback_method.hpp"
 
 class sl;
@@ -112,11 +111,11 @@ class boost_log {
     friend server;
 
   private:
-    boost::log::trivial::severity_level _level;
+    spdlog::level::level_enum _level;
     void init(const YAML::Node& node);
 
   public:
-    boost::log::trivial::severity_level level();
+    spdlog::level::level_enum level();
 };
 
 class server {

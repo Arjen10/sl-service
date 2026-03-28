@@ -4,14 +4,14 @@
   "dependencies": [
     "boost-asio",
     "boost-beast",
-    "boost-log",
     "boost-crc",
     "boost-uuid",
     "boost-mqtt5",
     "boost-program-options",
     "nlohmann-json",
     "yaml-cpp",
-    "cpr"
+    "cpr",
+    "spdlog"
   ],
   "overrides": [
     {
@@ -20,10 +20,6 @@
     },
     {
       "name": "boost-beast",
-      "version": "1.88.0"
-    },
-    {
-      "name": "boost-log",
       "version": "1.88.0"
     },
     {
@@ -53,6 +49,10 @@
     {
       "name": "yaml-cpp",
       "version": "0.8.0"
+    },
+    {
+      "name": "spdlog",
+      "version": "1.15.2"
     }
   ]
 }

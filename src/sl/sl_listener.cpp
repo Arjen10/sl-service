@@ -1,10 +1,9 @@
 //
 // Created by Arjen on 2024/12/21.
 //
+#include <spdlog/spdlog.h>
 
 #include "sl_listener.hpp"
-
-#include "../core/log.hpp"
 
 sl_listener::sl_listener(net::io_context& ioc, const tcp::endpoint& endpoint)
     : ioc_(ioc), acceptor_(net::make_strand(ioc)) {
@@ -13,28 +12,28 @@ sl_listener::sl_listener(net::io_context& ioc, const tcp::endpoint& endpoint)
     // Open the acceptor
     acceptor_.open(endpoint.protocol(), ec);
     if (ec) {
-        LOG_ERROR << ec.message() << " open";
+        spdlog::error("{} open", ec.what());
         return;
     }
 
     // Allow address reuse
     acceptor_.set_option(net::socket_base::reuse_address(true), ec);
     if (ec) {
-        LOG_ERROR << ec.message() << " set_option";
+        spdlog::error(" {} set_option", ec.message());
         return;
     }
 
     // Bind to the server address
     acceptor_.bind(endpoint, ec);
     if (ec) {
-        LOG_ERROR << ec.message() << " bind";
+        spdlog::error("{} bind", ec.message());
         return;
     }
 
     // Start listening for connections
     acceptor_.listen(net::socket_base::max_listen_connections, ec);
     if (ec) {
-        LOG_ERROR << ec.message() << " listen";
+        spdlog::error(" {} listen", ec.message());
         return;
     }
 }
@@ -50,9 +49,9 @@ void sl_listener::do_accept() {
 }
 
 void sl_listener::on_accept(beast::error_code ec, tcp::socket socket) {
-    LOG_DEBUG << socket.remote_endpoint().address().to_string() << " accept";
+    spdlog::debug("{} accept", socket.remote_endpoint().address().to_string());
     if (ec) {
-        LOG_ERROR << ec.message() << " accept";
+        spdlog::error("{} accept", ec.message());
     } else {
         // 创建一个水利会话，并运行
         auto session_ptr = std::make_shared<sl_session>(std::move(socket), this->ioc_);
