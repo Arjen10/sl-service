@@ -28,6 +28,12 @@ std::size_t sl_req_decoder::put(boost::asio::const_buffer buffer, boost::system:
             reader_helper.get_short(note, reader_helper.read_index());
             protocol_define_ = protocol_factory::create(note);
         }
+        if (!protocol_define_) {
+            this->reset();
+            // 不支持的协议，直接返回了
+            ec = boost::beast::http::error::bad_version;
+            return 0;
+        }
         // 如果小于了协议头的最大长度，直接返回，让asio继续读
         std::size_t header_max_len = protocol_define_->header_max_len();
         if (n < header_max_len) {

@@ -147,8 +147,7 @@ void sl_session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
         return;
     }
     if (ec) {
-        SPDLOG_ERROR(ec.message());
-        // todo 如果这里报错应该直接关闭？
+        this->close(ec.message());
         return;
     }
     // fixme 这里如果什么都不传，会有报错
