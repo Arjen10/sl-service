@@ -246,6 +246,7 @@ namespace sl651_2014::codec {
         // 流水号 2字节
         reader.read_short(c_ptr->_serial_num);
         c_ptr->_raw_list.emplace_back(hex_reader, SERIAL_NUM_LEN, SERIAL_NUM_NOTE, std::to_string(c_ptr->_serial_num));
+        SPDLOG_TRACE("流水号 raw {}, raw_hex {}", c_ptr->_serial_num, c_ptr->_raw_list.back()._raw_hex);
         // 发报时间 6字节 250721013101
         reader.read_tm(c_ptr->_report_tm, REPORT_TM_LEN);
         nlohmann::json temp_j;
@@ -316,7 +317,7 @@ namespace sl651_2014::codec {
                 c_ptr->_raw_list.emplace_back(hex_reader, 1, expand_note, true);
                 auto v_str = temp_opt ? std::to_string(temp_opt.value()) : "null";
                 c_ptr->_raw_list.emplace_back(hex_reader, data_len, expand_note + "  取值", v_str, true);
-                SPDLOG_WARN("不支持的标识符 {} 值 {}", oss.str(), v_str);
+                SPDLOG_WARN("不支持的标识符 {}, 值 {}", oss.str(), v_str);
             } catch (std::exception& e) {
                 SPDLOG_ERROR(e.what());
                 throw e;
@@ -354,6 +355,21 @@ namespace sl651_2014::codec {
         this->call_back(h_ptr->_rtu_stcd, h_ptr, c_ptr, e_ptr);
     }
 
+    /**
+     * 7E 7E
+     * 00 60 80 20 41
+     * 01
+     * 00 00
+     * 32
+     * 80 0E
+     * 02
+     * 46 5D
+     * 26 04 11 14 27 11
+     * F1
+     * 00 60 80 20 41
+     * 1B
+     * 38 0D
+     */
     std::optional<std::shared_ptr<asio::streambuf>> decoder::resp_byte_buffer(const model::h_shared_ptr& h_ptr,
                                                                               const model::c_shared_ptr& c_ptr,
                                                                               const model::e_shared_ptr& e_ptr) {
@@ -378,13 +394,16 @@ namespace sl651_2014::codec {
         // 密码
         boost::algorithm::unhex(h_ptr->_pwd.begin(), h_ptr->_pwd.end(), std::back_inserter(tmp_bytes));
         os.write(tmp_bytes.data(), tmp_bytes.size());
+        tmp_bytes.clear();
         // 功能码 1 字节
         os.put(h_ptr->_function);
         auto& cd = encoder::encoder_map.at(h_ptr->_function);
         // 得到正文部分
         cd(h_ptr, c_ptr, e_ptr, tmp_bytes);
-        // 这里写入正文长度
-        os.put(static_cast<short>(tmp_bytes.size() | 0x8000));
+        // 这里写入正文长度（2字节：高4位上下行标识+低12位正文长度）
+        const auto content_len_with_flag = static_cast<uint16_t>(tmp_bytes.size() | 0x8000);
+        os.put(static_cast<char>((content_len_with_flag >> 8) & 0xFF));
+        os.put(static_cast<char>(content_len_with_flag & 0xFF));
         // 写出正文
         os.put(model::const_symbol::stx);
         os.write(tmp_bytes.data(), tmp_bytes.size());
@@ -752,12 +771,13 @@ namespace sl651_2014::encoder {
          [](const model::h_shared_ptr& h, const model::c_shared_ptr& c, const model::e_shared_ptr& e,
             std::vector<char>& buffer) {
              // 写出流水号
-             buffer.emplace_back(c->_serial_num);
+             buffer.emplace_back(static_cast<char>((c->_serial_num >> 8) & 0xFF));
+             buffer.emplace_back(static_cast<char>(c->_serial_num & 0xFF));
              // 写出接收时间
              auto now = boost::posix_time::second_clock::local_time();
              auto date = now.date();
              auto time = now.time_of_day();
-             buffer.emplace_back(int_to_bcd_char(date.year()));
+             buffer.emplace_back(int_to_bcd_char(date.year() % 100));
              buffer.emplace_back(int_to_bcd_char(date.month()));
              buffer.emplace_back(int_to_bcd_char(date.day()));
              buffer.emplace_back(int_to_bcd_char(time.hours()));
