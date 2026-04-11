@@ -1,6 +1,9 @@
 name: Build and Publish Docker Image
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
@@ -26,7 +29,36 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Build image (no push)
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: sl-service:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test container
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+        run: |
+          docker run -d --name sl-service-smoke -p 14399:4399 sl-service:ci
+          sleep 8
+          docker ps --filter "name=sl-service-smoke" --filter "status=running" --format "{{.Names}}" | grep -q "^sl-service-smoke$"
+
+      - name: Print smoke test logs
+        if: always() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/main')
+        run: docker logs sl-service-smoke || true
+
+      - name: Cleanup smoke test container
+        if: always() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/main')
+        run: docker rm -f sl-service-smoke || true
+
       - name: Login to GHCR
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -34,17 +66,17 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract Docker metadata
+        if: startsWith(github.ref, 'refs/tags/v')
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/sl-service
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=branch
             type=ref,event=tag
             type=sha
 
       - name: Build and push
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: docker/build-push-action@v6
         with:
           context: .

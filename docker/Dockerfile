@@ -4,6 +4,7 @@
 FROM ubuntu:24.04 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
+ARG VCPKG_COMMIT=48a0cef9ea67606c94f149647470c956bb78050a
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -30,8 +31,10 @@ RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/nul
 
 WORKDIR /opt
 
-# 关键修复：不要用 --depth=1，全量克隆 vcpkg（解决 git tree read-tree 问题）
+# 固定 vcpkg 提交，确保可复现构建
 RUN git clone https://github.com/microsoft/vcpkg.git && \
+    cd /opt/vcpkg && \
+    git checkout ${VCPKG_COMMIT} && \
     /opt/vcpkg/bootstrap-vcpkg.sh -disableMetrics && \
     # 清理不必要的文件，减小 builder 体积
     rm -rf /opt/vcpkg/buildtrees /opt/vcpkg/downloads /opt/vcpkg/.git
@@ -39,7 +42,7 @@ RUN git clone https://github.com/microsoft/vcpkg.git && \
 WORKDIR /app
 
 # 重要优化：先复制 vcpkg 清单文件，利用 Docker 缓存（vcpkg install 只在依赖变化时重新跑）
-COPY vcpkg.json vcpkg-configuration.json ./
+COPY vcpkg.json ./
 
 RUN /opt/vcpkg/vcpkg install --feature-flags=manifests
 
@@ -50,7 +53,9 @@ RUN cmake -S . -B build -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake \
     -DVCPKG_FEATURE_FLAGS=manifests && \
-    cmake --build build --config Release -j"$(nproc)"
+    cmake --build build --config Release -j"$(nproc)" && \
+    ldd /app/build/sl-service | tee /tmp/ldd.out && \
+    ! grep -q "not found" /tmp/ldd.out
 
 # ==================== 第二阶段：运行阶段 ====================
 FROM ubuntu:24.04 AS runtime
@@ -63,6 +68,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY --from=builder /app/build/sl-service /app/sl-service
+COPY --from=builder /app/config.yaml /app/config.yaml
+
+RUN groupadd --gid 10001 appuser && \
+    useradd --uid 10001 --gid appuser --create-home --shell /usr/sbin/nologin appuser && \
+    chown -R appuser:appuser /app
+
+USER appuser
 
 EXPOSE 4399
 
