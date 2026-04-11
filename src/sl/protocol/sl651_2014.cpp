@@ -318,9 +318,9 @@ namespace sl651_2014::codec {
                 auto v_str = temp_opt ? std::to_string(temp_opt.value()) : "null";
                 c_ptr->_raw_list.emplace_back(hex_reader, data_len, expand_note + "  取值", v_str, true);
                 SPDLOG_WARN("不支持的标识符 {}, 值 {}", oss.str(), v_str);
-            } catch (std::exception& e) {
+            } catch (const std::exception& e) {
                 SPDLOG_ERROR(e.what());
-                throw e;
+                throw;
             }
         }
     }
@@ -475,18 +475,33 @@ namespace sl651_2014::parse {
         int8_t data_info;
         // 读取一个字节，包含后续数据长度和小数点位数
         reader.read_byte(data_info);
+        const auto data_info_u = static_cast<uint8_t>(data_info);
         // 取高五位 data_length 为数据的长度
-        uint32_t data_length = data_info >> 3;
+        uint32_t data_length = data_info_u >> 3;
         // 小数点取低三位，小数点位置
-        uint32_t decimal_point = data_info & 0x07;
-        std::int64_t ret = reader.read_bcd_byte_to_int64(data_length);
-        // 0xAAAAAAAA 无效值
-        if (ret == 0xAAAAAAAAULL) {
-            v = std::numeric_limits<double>::quiet_NaN();
-        } else {
-            // 除以 10^decimal_point，小数点左移
-            v = static_cast<double>(ret) / std::pow(10.0, decimal_point);
+        uint32_t decimal_point = data_info_u & 0x07;
+
+        if (reader.readable_bytes() < data_length) {
+            throw sl651_2014::error("要素数据长度超过剩余可读字节数");
         }
+
+        bool is_invalid_value = data_length > 0;
+        const auto data_start_index = reader.read_index();
+        for (uint32_t i = 0; i < data_length; ++i) {
+            int8_t raw;
+            reader.get_byte(raw, data_start_index + i);
+            is_invalid_value = is_invalid_value && (static_cast<uint8_t>(raw) == 0xAA);
+        }
+
+        if (is_invalid_value) {
+            reader.skip(data_length);
+            v = std::numeric_limits<double>::quiet_NaN();
+            return data_length + 1;
+        }
+
+        std::int64_t ret = reader.read_bcd_byte_to_int64(data_length);
+        // 除以 10^decimal_point，小数点左移
+        v = static_cast<double>(ret) / std::pow(10.0, decimal_point);
         return data_length + 1;
     }
 
