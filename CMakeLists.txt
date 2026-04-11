@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.30)
-project(sl-service)
+project(sl-service VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -49,6 +49,11 @@ target_link_libraries(${PROJECT_NAME}
         cpr::cpr
         yaml-cpp::yaml-cpp
         spdlog::spdlog
+)
+
+target_compile_definitions(${PROJECT_NAME}
+        PRIVATE
+        SL_SERVICE_VERSION="${PROJECT_VERSION}"
 )
 
 add_custom_command(

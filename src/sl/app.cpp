@@ -12,6 +12,10 @@
 #include "../core/mqtt5_client.hpp"
 #include "../core/sys_thread_pool.hpp"
 
+#ifndef SL_SERVICE_VERSION
+#define SL_SERVICE_VERSION "dev"
+#endif
+
 app::app(int argc, char* argv[]) : _argc(argc), _argv(argv) {
     this->_ioc = nullptr;
 }
@@ -30,6 +34,7 @@ app::~app() {
 int app::run() {
     this->argc_to_vm();
     this->setup_logger();
+    SPDLOG_INFO("sl-service Version: {}", SL_SERVICE_VERSION);
     SPDLOG_INFO("Boost Version: {}.{}.{}", BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
     this->load_config();
     // ioc 必须在配置文件初始化完成后立即初始
