@@ -296,11 +296,12 @@ namespace sl651_2014::codec {
             int8_t element_lead_symbol = reader.read_byte();
             auto key = static_cast<model::data_type>(element_lead_symbol);
             // 如果是标准值，直接用内置的解析器封装成对象即可
-            if (parse::strategy.count(key) != 0) {
+            const auto strategy_it = parse::strategy.find(key);
+            if (strategy_it != parse::strategy.end()) {
                 temp_j.clear();
                 json::to_json(temp_j, key);
                 c_ptr->_raw_list.emplace_back(hex_reader, 1, temp_j.get<std::string>() + "标识符");
-                const parse::parse_function& func = parse::strategy.at(key);
+                const parse::parse_function& func = strategy_it->second;
                 func(reader, hex_reader, c_ptr);
                 continue;
             }
