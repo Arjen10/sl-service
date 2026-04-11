@@ -14,8 +14,8 @@ server:
     # 业务线程池数量，默认 4
     pool: 4
   log:
-    # trace debug info warning error fatal
-    # 如果在上方日志等级中没有出现，默认 info
+    # trace debug info warn err critical off
+    # 如果在上方日志等级中没有出现，默认 trace
     level: trace
 
 callback:
@@ -23,7 +23,7 @@ callback:
   enable: false
   # 回调方式：http、mqtt
   method: mqtt
-  http:
+  http: # http：只适合联调测试 debug，不适合生产环境设备量大情况
     # post http url，json 数据通过请求体传输
     url: http://127.0.0.1:6620/awqmd/test
     # 连接超时，单位秒
