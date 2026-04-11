@@ -4,6 +4,8 @@
 
 #include "byte_buf_reader.hpp"
 
+#include <stdexcept>
+
 byte_buf_reader::byte_buf_reader(const boost::asio::const_buffer& buffer) : buffer_(buffer), read_index_(0) {
     p_ = static_cast<char const*>(buffer_.data());
 }
@@ -13,6 +15,9 @@ void byte_buf_reader::read_byte(int8_t& byte) {
 }
 
 int8_t byte_buf_reader::read_byte() {
+    if (readable_bytes() < 1) {
+        throw std::out_of_range("read_byte out of range");
+    }
     return p_[read_index_++];
 }
 
@@ -28,24 +33,37 @@ void byte_buf_reader::get_bytes(std::vector<int8_t>& bytes, std::size_t start, s
 }
 
 void byte_buf_reader::read_byte(std::uint8_t& byte) {
+    if (readable_bytes() < 1) {
+        throw std::out_of_range("read_byte out of range");
+    }
     byte = p_[read_index_++];
 }
 
 void byte_buf_reader::read_bytes(std::vector<int8_t>& bytes, std::size_t length) {
+    if (readable_bytes() < length) {
+        throw std::out_of_range("read_bytes out of range");
+    }
     bytes.clear();
-    for (int i = 0; i < length; ++i) {
+    for (std::size_t i = 0; i < length; ++i) {
         bytes.push_back(p_[read_index_ + i]);
     }
     read_index_ += length;
 }
 
 void byte_buf_reader::read_short(int16_t& s) {
+    if (readable_bytes() < 2) {
+        throw std::out_of_range("read_short out of range");
+    }
     get_short(s, read_index());
     // 读指针加 2 即可
     read_index_ += 2;
 }
 
 void byte_buf_reader::get_short(int16_t& s, std::size_t index) {
+    const auto size = boost::asio::buffer_size(buffer_);
+    if (index >= size || size - index < 2) {
+        throw std::out_of_range("get_short out of range");
+    }
     const auto high = static_cast<unsigned char>(p_[index]);
     const auto low = static_cast<unsigned char>(p_[index + 1]);
     s = static_cast<int16_t>((high << 8) | low);

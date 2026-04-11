@@ -178,7 +178,11 @@ void sl_session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
 
 void sl_session::do_write(std::optional<std::shared_ptr<asio::streambuf>>&& buffer) {
     auto self = shared_from_this();
-    auto& buf_ptr = *buffer;
+    if (!buffer.has_value() || !buffer.value()) {
+        self->do_read();
+        return;
+    }
+    auto buf_ptr = std::move(buffer.value());
     net::async_write(socket_, *buf_ptr, [self, buf_ptr](boost::system::error_code ec, std::size_t bytes_transferred) {
         if (ec) {
             SPDLOG_ERROR(" 写出失败！{}", ec.message());

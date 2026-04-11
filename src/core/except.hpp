@@ -7,15 +7,24 @@
 
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 namespace parse {
 
     /**
      * 解析异常类
      */
-    class error : std::exception {
+    class error : public std::exception {
       private:
         std::string full_msg;
+
+      public:
+        explicit error(std::string msg = "parse error");
+
+        virtual ~error() throw() {
+        }
+
+        virtual const char* what() const throw();
     };
 
 } // namespace parse
