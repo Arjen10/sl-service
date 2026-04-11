@@ -468,6 +468,31 @@ namespace sl651_2014::codec {
 
 namespace sl651_2014::parse {
 
+    namespace {
+
+        template <typename T> T& require_optional(std::optional<T>& value, const char* name) {
+            if (!value.has_value()) {
+                throw sl651_2014::error(std::string("缺少") + name + "数据容器");
+            }
+            return value.value();
+        }
+
+        parse_function
+        make_numeric_parser(model::data_type data_type, const char* trace_name,
+                            const std::function<std::optional<double>&(model::content&)>& value_accessor) {
+            return [data_type, trace_name, value_accessor](byte_buf_reader& reader, byte_buf_reader& hex_reader,
+                                                           model::c_shared_ptr& content) {
+                auto& value_opt = value_accessor(*content);
+                const auto data_len = parse_data(reader, value_opt);
+                handle_v(content, hex_reader, data_len, data_type, value_opt);
+                if (value_opt.has_value()) {
+                    SPDLOG_TRACE("{}  {}", trace_name, value_opt.value());
+                }
+            };
+        }
+
+    } // namespace
+
     /**
      * 解析 bcd 编码的数据
      */
@@ -563,204 +588,79 @@ namespace sl651_2014::parse {
              content->_raw_list.emplace_back(hex_reader, STCD_LEN, STCD_NOTE, content->_stcd);
          }},
 
-        /**
-         * 瞬时水温
-         */
-        {model::data_type::c,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             auto& wtmp_opt = content->_obwt->_wtmp;
-             auto data_size = parse_data(reader, wtmp_opt);
-             handle_v(content, hex_reader, data_size, model::data_type::c, wtmp_opt);
-             if (wtmp_opt.has_value()) {
-                 SPDLOG_TRACE("瞬时水温  {}", wtmp_opt.value());
-             }
-         }},
+        {model::data_type::c, make_numeric_parser(model::data_type::c, "瞬时水温",
+                                                  [](model::content& content) -> std::optional<double>& {
+                                                      return require_optional(content._obwt, "水温")._wtmp;
+                                                  })},
 
-        /**
-         * 电压
-         */
         {model::data_type::vt,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             auto& v_opt = content->_v;
-             auto data_len = parse_data(reader, v_opt);
-             handle_v(content, hex_reader, data_len, model::data_type::vt, v_opt);
-             if (v_opt.has_value()) {
-                 SPDLOG_TRACE("电压  {}", v_opt.value());
-             }
-         }},
+         make_numeric_parser(model::data_type::vt, "电压",
+                             [](model::content& content) -> std::optional<double>& { return content._v; })},
 
-        /**
-         * ph值
-         */
-        {model::data_type::ph,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             auto& ph_opt = content->_awqmd->_ph;
-             auto data_len = parse_data(reader, ph_opt);
-             handle_v(content, hex_reader, data_len, model::data_type::ph, ph_opt);
-             if (ph_opt.has_value()) {
-                 SPDLOG_TRACE("ph值  {}", ph_opt.value());
-             }
-         }},
+        {model::data_type::ph, make_numeric_parser(model::data_type::ph, "ph值",
+                                                   [](model::content& content) -> std::optional<double>& {
+                                                       return require_optional(content._awqmd, "水质")._ph;
+                                                   })},
 
-        /**
-         * 溶解氧
-         */
-        {model::data_type::dox,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             auto& dox_opt = content->_awqmd->_dox;
-             auto data_len = parse_data(reader, dox_opt);
-             handle_v(content, hex_reader, data_len, model::data_type::dox, dox_opt);
-             if (dox_opt.has_value()) {
-                 SPDLOG_TRACE("溶解氧  {}", dox_opt.value());
-             }
-         }},
+        {model::data_type::dox, make_numeric_parser(model::data_type::dox, "溶解氧",
+                                                    [](model::content& content) -> std::optional<double>& {
+                                                        return require_optional(content._awqmd, "水质")._dox;
+                                                    })},
 
-        /**
-         * 电导率
-         */
-        {model::data_type::cond,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             auto& cond_opt = content->_awqmd->_cond;
-             auto data_len = parse_data(reader, cond_opt);
-             handle_v(content, hex_reader, data_len, model::data_type::cond, cond_opt);
-             if (cond_opt.has_value()) {
-                 SPDLOG_TRACE("电导率  {}", cond_opt.value());
-             }
-         }},
+        {model::data_type::cond, make_numeric_parser(model::data_type::cond, "电导率",
+                                                     [](model::content& content) -> std::optional<double>& {
+                                                         return require_optional(content._awqmd, "水质")._cond;
+                                                     })},
 
-        /**
-         * 浊度
-         */
-        {model::data_type::turb,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             auto& turb_opt = content->_awqmd->_turb;
-             auto data_len = parse_data(reader, turb_opt);
-             handle_v(content, hex_reader, data_len, model::data_type::turb, turb_opt);
-             if (turb_opt.has_value()) {
-                 SPDLOG_TRACE("浊度  {}", turb_opt.value());
-             }
-         }},
+        {model::data_type::turb, make_numeric_parser(model::data_type::turb, "浊度",
+                                                     [](model::content& content) -> std::optional<double>& {
+                                                         return require_optional(content._awqmd, "水质")._turb;
+                                                     })},
 
-        /**
-         * 高锰酸盐指数
-         */
-        {model::data_type::codmn,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             auto& codmn_opt = content->_awqmd->_codmn;
-             auto data_len = parse_data(reader, codmn_opt);
-             handle_v(content, hex_reader, data_len, model::data_type::codmn, codmn_opt);
-             if (codmn_opt.has_value()) {
-                 SPDLOG_TRACE("高锰酸盐指数  {}", codmn_opt.value());
-             }
-         }},
+        {model::data_type::codmn, make_numeric_parser(model::data_type::codmn, "高锰酸盐指数",
+                                                      [](model::content& content) -> std::optional<double>& {
+                                                          return require_optional(content._awqmd, "水质")._codmn;
+                                                      })},
 
-        /**
-         * 氨氮
-         */
-        {model::data_type::nh4n,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             // 这里是按照标准建表
-             auto& nh3n_opt = content->_awqmd->_nh3n;
-             auto data_len = parse_data(reader, nh3n_opt);
-             handle_v(content, hex_reader, data_len, model::data_type::nh4n, nh3n_opt);
-             if (nh3n_opt.has_value()) {
-                 SPDLOG_TRACE("氨氮  {}", nh3n_opt.value());
-             }
-         }},
+        {model::data_type::nh4n, make_numeric_parser(model::data_type::nh4n, "氨氮",
+                                                     [](model::content& content) -> std::optional<double>& {
+                                                         return require_optional(content._awqmd, "水质")._nh3n;
+                                                     })},
 
-        /**
-         * 总磷
-         */
-        {model::data_type::tp,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             // 这里是按照标准建表
-             auto& tp_opt = content->_awqmd->_tp;
-             auto data_len = parse_data(reader, tp_opt);
-             handle_v(content, hex_reader, data_len, model::data_type::tp, tp_opt);
-             if (tp_opt.has_value()) {
-                 SPDLOG_TRACE("总磷  {}", tp_opt.value());
-             }
-         }},
+        {model::data_type::tp, make_numeric_parser(model::data_type::tp, "总磷",
+                                                   [](model::content& content) -> std::optional<double>& {
+                                                       return require_optional(content._awqmd, "水质")._tp;
+                                                   })},
 
-        /**
-         * 总氮
-         */
-        {model::data_type::tn,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             // 这里是按照标准建表
-             auto& tn_opt = content->_awqmd->_tn;
-             auto data_len = parse_data(reader, tn_opt);
-             handle_v(content, hex_reader, data_len, model::data_type::tn, tn_opt);
-             if (tn_opt.has_value()) {
-                 SPDLOG_TRACE("总氮  {}", tn_opt.value());
-             }
-         }},
+        {model::data_type::tn, make_numeric_parser(model::data_type::tn, "总氮",
+                                                   [](model::content& content) -> std::optional<double>& {
+                                                       return require_optional(content._awqmd, "水质")._tn;
+                                                   })},
 
-        /**
-         * 有机总碳
-         */
-        {model::data_type::toc,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             // 这里是按照标准建表
-             auto& tn_opt = content->_awqmd->_toc;
-             auto data_len = parse_data(reader, tn_opt);
-             handle_v(content, hex_reader, data_len, model::data_type::toc, tn_opt);
-             if (tn_opt.has_value()) {
-                 SPDLOG_TRACE("有机总碳  {}", tn_opt.value());
-             }
-         }},
+        {model::data_type::toc, make_numeric_parser(model::data_type::toc, "有机总碳",
+                                                    [](model::content& content) -> std::optional<double>& {
+                                                        return require_optional(content._awqmd, "水质")._toc;
+                                                    })},
 
-        /**
-         * 铜
-         */
-        {model::data_type::cu,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             auto& tn_opt = content->_awqmd->_cu;
-             auto data_len = parse_data(reader, tn_opt);
-             handle_v(content, hex_reader, data_len, model::data_type::cu, tn_opt);
-             if (tn_opt.has_value()) {
-                 SPDLOG_TRACE("铜  {}", tn_opt.value());
-             }
-         }},
+        {model::data_type::cu, make_numeric_parser(model::data_type::cu, "铜",
+                                                   [](model::content& content) -> std::optional<double>& {
+                                                       return require_optional(content._awqmd, "水质")._cu;
+                                                   })},
 
-        /**
-         * 锌
-         */
-        {model::data_type::zn,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             auto& zn_opt = content->_awqmd->_zn;
-             auto data_len = parse_data(reader, zn_opt);
-             handle_v(content, hex_reader, data_len, model::data_type::zn, zn_opt);
-             if (zn_opt.has_value()) {
-                 SPDLOG_TRACE("锌  {}", zn_opt.value());
-             }
-         }},
+        {model::data_type::zn, make_numeric_parser(model::data_type::zn, "锌",
+                                                   [](model::content& content) -> std::optional<double>& {
+                                                       return require_optional(content._awqmd, "水质")._zn;
+                                                   })},
 
-        /**
-         * 铅
-         */
-        {model::data_type::pb,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             auto& pb_opt = content->_awqmd->_pb;
-             auto data_len = parse_data(reader, pb_opt);
-             handle_v(content, hex_reader, data_len, model::data_type::pb, pb_opt);
-             if (pb_opt.has_value()) {
-                 SPDLOG_TRACE("铅  {}", pb_opt.value());
-             }
-         }},
+        {model::data_type::pb, make_numeric_parser(model::data_type::pb, "铅",
+                                                   [](model::content& content) -> std::optional<double>& {
+                                                       return require_optional(content._awqmd, "水质")._pb;
+                                                   })},
 
-        /**
-         * 叶绿素a
-         */
-        {model::data_type::chla,
-         [](byte_buf_reader& reader, byte_buf_reader& hex_reader, std::shared_ptr<model::content>& content) {
-             auto& chla_opt = content->_awqmd->_chla;
-             auto data_len = parse_data(reader, chla_opt);
-             handle_v(content, hex_reader, data_len, model::data_type::chla, chla_opt);
-             if (chla_opt.has_value()) {
-                 SPDLOG_TRACE("叶绿素a  {}", chla_opt.value());
-             }
-         }},
+        {model::data_type::chla, make_numeric_parser(model::data_type::chla, "叶绿素a",
+                                                     [](model::content& content) -> std::optional<double>& {
+                                                         return require_optional(content._awqmd, "水质")._chla;
+                                                     })},
 
     };
 
