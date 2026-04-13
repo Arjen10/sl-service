@@ -171,7 +171,7 @@ namespace sl651_2014 {
         /**
          * 请求类型
          */
-        enum req_type : char {
+        enum req_type : std::int8_t {
 
             // 遥测站人工置数报
             MANUAL_DATA = 0x35,
@@ -196,7 +196,7 @@ namespace sl651_2014 {
         /**
          * 帧符号
          */
-        enum frame_symbol : short {
+        enum frame_symbol : std::int16_t {
 
             // 帧起始和报文正文起始符
             start_and_end = 0x7E7E,
@@ -206,7 +206,7 @@ namespace sl651_2014 {
         /**
          * 表10 报文帧定义符号
          */
-        enum const_symbol : char {
+        enum const_symbol : std::int8_t {
 
             // 报文起始符，传输开始
             stx = 0x02,
@@ -226,7 +226,7 @@ namespace sl651_2014 {
         /**
          * 测站类型
          */
-        enum station_type : int8_t {
+        enum station_type : std::int8_t {
 
             // 水库水文站
             rr = 0x4B,
@@ -245,7 +245,7 @@ namespace sl651_2014 {
         /**
          * 数据类型标识符，都用带符号为的字节处理，不要管他是正数还是负数，一个字，干就完事儿
          */
-        enum data_type : int8_t {
+        enum data_type : std::int8_t {
 
             // 观测时间标识符
             tt = static_cast<int8_t>(0xF0),

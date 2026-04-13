@@ -5,6 +5,7 @@
 #include <spdlog/spdlog.h>
 
 #include "sl651_2014.hpp"
+#include "../byte_buf_writer.hpp"
 
 namespace sl651_2014::json {
 
@@ -374,49 +375,30 @@ namespace sl651_2014::codec {
     std::optional<std::shared_ptr<asio::streambuf>> decoder::resp_byte_buffer(const model::h_shared_ptr& h_ptr,
                                                                               const model::c_shared_ptr& c_ptr,
                                                                               const model::e_shared_ptr& e_ptr) {
-        // 协议标准说明，链路维持报，无需响应
         if (h_ptr->_function == model::req_type::KEEP_ALIVE) {
             return std::nullopt;
         }
         auto sb = std::make_shared<asio::streambuf>();
-        std::ostream os(&(*sb));
-        // --------开始报头部分----------
-        // 写出报头
-        short head = model::frame_symbol::start_and_end;
-        os.write(reinterpret_cast<char*>(&head), sizeof(head));
+        byte_buf_writer w(*sb);
+        w.write_short(model::frame_symbol::start_and_end);
         std::string rtu_stcd = (h_ptr->_rtu_stcd.length() == 10 ? h_ptr->_rtu_stcd : ("00" + h_ptr->_rtu_stcd));
-        // rtu stcd
-        std::vector<char> tmp_bytes;
-        boost::algorithm::unhex(rtu_stcd.begin(), rtu_stcd.end(), std::back_inserter(tmp_bytes));
-        os.write(tmp_bytes.data(), tmp_bytes.size());
-        // 中心站
-        os.put(h_ptr->_central_address);
-        tmp_bytes.clear();
-        // 密码
-        boost::algorithm::unhex(h_ptr->_pwd.begin(), h_ptr->_pwd.end(), std::back_inserter(tmp_bytes));
-        os.write(tmp_bytes.data(), tmp_bytes.size());
-        tmp_bytes.clear();
-        // 功能码 1 字节
-        os.put(h_ptr->_function);
+        w.write_hex_str(rtu_stcd);
+        w.write_byte(h_ptr->_central_address);
+        w.write_hex_str(h_ptr->_pwd);
+        w.write_byte(static_cast<int8_t>(h_ptr->_function));
         auto& cd = encoder::encoder_map.at(h_ptr->_function);
-        // 得到正文部分
+        std::vector<char> tmp_bytes;
         cd(h_ptr, c_ptr, e_ptr, tmp_bytes);
-        // 这里写入正文长度（2字节：高4位上下行标识+低12位正文长度）
         const auto content_len_with_flag = static_cast<uint16_t>(tmp_bytes.size() | 0x8000);
-        os.put(static_cast<char>((content_len_with_flag >> 8) & 0xFF));
-        os.put(static_cast<char>(content_len_with_flag & 0xFF));
-        // 写出正文
-        os.put(model::const_symbol::stx);
-        os.write(tmp_bytes.data(), tmp_bytes.size());
-        tmp_bytes.clear();
-        // --------开始报尾部分----------
-        os.put(model::const_symbol::esc);
-        // crc计算
+        w.write_byte(static_cast<uint8_t>((content_len_with_flag >> 8) & 0xFF));
+        w.write_byte(static_cast<uint8_t>(content_len_with_flag & 0xFF));
+        w.write_byte(static_cast<int8_t>(model::const_symbol::stx));
+        w.write_bytes(tmp_bytes.data(), tmp_bytes.size());
+        w.write_byte(static_cast<int8_t>(model::const_symbol::esc));
         custom_crc_type crc_calculator;
         crc_calculator.process_bytes(sb->data().data(), sb->size());
-        // 写出 crc
-        auto ret_crc = static_cast<short>(crc_calculator.checksum());
-        os.write(reinterpret_cast<const char*>(&ret_crc), sizeof(ret_crc));
+        w.write_short(static_cast<int16_t>(crc_calculator.checksum()));
+        SPDLOG_DEBUG(" 响应报文 {} ", w.debug());
         return sb;
     }
 
