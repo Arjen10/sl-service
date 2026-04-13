@@ -380,6 +380,7 @@ namespace sl651_2014::codec {
         }
         auto sb = std::make_shared<asio::streambuf>();
         byte_buf_writer w(*sb);
+        // 开始报头固定结构
         w.write_short(model::frame_symbol::start_and_end);
         std::string rtu_stcd = (h_ptr->_rtu_stcd.length() == 10 ? h_ptr->_rtu_stcd : ("00" + h_ptr->_rtu_stcd));
         w.write_hex_str(rtu_stcd);
@@ -388,11 +389,14 @@ namespace sl651_2014::codec {
         w.write_byte(static_cast<int8_t>(h_ptr->_function));
         auto& cd = encoder::encoder_map.at(h_ptr->_function);
         std::vector<char> tmp_bytes;
+        // 可变结构
         cd(h_ptr, c_ptr, e_ptr, tmp_bytes);
+        // 开始报尾固定结构
         const auto content_len_with_flag = static_cast<uint16_t>(tmp_bytes.size() | 0x8000);
         w.write_byte(static_cast<uint8_t>((content_len_with_flag >> 8) & 0xFF));
         w.write_byte(static_cast<uint8_t>(content_len_with_flag & 0xFF));
         w.write_byte(static_cast<int8_t>(model::const_symbol::stx));
+        // 写入可变结构
         w.write_bytes(tmp_bytes.data(), tmp_bytes.size());
         w.write_byte(static_cast<int8_t>(model::const_symbol::esc));
         custom_crc_type crc_calculator;
